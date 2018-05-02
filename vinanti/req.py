@@ -1,5 +1,3 @@
-#!/bin/bash/env python
-
 """
 Copyright (C) 2018 kanishka-linux kanishka.linux@gmail.com
 
@@ -33,7 +31,6 @@ class RequestObject:
         self.html = None
         self.status = None
         self.info = None
-        self.url = url
         self.method = method
         self.error = None
         self.data = None
