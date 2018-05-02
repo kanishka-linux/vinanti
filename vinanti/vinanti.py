@@ -1,5 +1,3 @@
-#!/bin/bash/env python
-
 """
 Copyright (C) 2018 kanishka-linux kanishka.linux@gmail.com
 
@@ -20,11 +18,12 @@ along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import asyncio
-import urllib.request
 import urllib.parse
+import urllib.request
 from functools import partial
 from threading import Thread
 from collections import OrderedDict
+
 try:
     from vinanti.req import RequestObject
 except ImportError:
@@ -43,7 +42,6 @@ class Vinanti:
             self.block = block
         self.loop = asyncio.get_event_loop()
         self.tasks = OrderedDict()
-        self.new_loop = None
         self.loop_nonblock_list = []
         
     def clear(self):
