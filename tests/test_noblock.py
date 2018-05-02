@@ -1,4 +1,3 @@
-#!/bin/bash/env python
 """
 Copyright (C) 2018 kanishka-linux kanishka.linux@gmail.com
 
@@ -27,7 +26,8 @@ def hello(*args):
     future = args[-1]
     result = future.result()
     if len(args) > 3:
-        print(args)
+        new_args = args[:-3]
+        print(new_args)
     if result:
         info = result.info
         if info:
