@@ -84,7 +84,7 @@ Async/await is a great feature of python, but at the same time pretty confusing.
 
 ### Caution
 
-This library is highly experimental and currently only supports GET, POST and HEAD requests in limited manner. There is no support for cookies or downloading binary files or uploading files at the moment. If program looks stable after thorough testing, only then other advance features will be added to it. It is working fine within small synchronous programs. But, I don't know how it will behave in large complex program. So, for a time being just play with it and don't use it in production till it achieves maturity. 
+This library is highly experimental and currently only supports GET, POST and HEAD requests in limited manner. There is no support for cookies or uploading files at the moment. If program looks stable after thorough testing, only then other advance features will be added to it. It is working fine within small synchronous programs. But, I don't know how it will behave in large complex program. So, for a time being just play with it and don't use it in production till it achieves maturity. 
 
 ### About word Vinanti
 
