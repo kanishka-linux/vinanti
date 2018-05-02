@@ -36,19 +36,19 @@ Experimental async http request library for python with focus on simplicity
         
         print('Completed')
         
-    * In above sample code, once vnt.start() gets executed, the main thread will be blocked, but list of urls will be fetched asynchronously. After fetching every url, the **hello** callback function will be called. Once all urls are fetched, it will print 'Completed'.
+* In above sample code, once vnt.start() gets executed, the main thread will be blocked, but list of urls will be fetched asynchronously. After fetching every url, the **hello** callback function will be called. Once all urls are fetched, it will print 'Completed'.
     
-    * Now just replace **Vinanti(block=True)** with **Vinanti(block=False)**, in above code and run. It will execute entire code and won't block after vnt.start(). In above code, users will find that it will print 'Completed' immediately, and fetching of urls will keep on going in the background asynchronously.
+* Now just replace **Vinanti(block=True)** with **Vinanti(block=False)**, in above code and run. It will execute entire code and won't block after vnt.start(). In above code, users will find that it will print 'Completed' immediately, and fetching of urls will keep on going in the background asynchronously.
     
-    * About Callback **hello** function: This function will be called after fetching of every url has been completed. If no parameters are passed to hello function using partial, then callback will return with three parameters. Signature of default hello function looks like below:
+* About Callback **hello** function: This function will be called after fetching of every url has been completed. If no parameters are passed to hello function using partial, then callback will return with three parameters. Signature of default hello function looks like below:
         
         hello(int task_number, str url_name, future_object_with_information)
         
-    * users can also use: hello(*args) signature, in case arbitrary number of parameters have been passed to hello. In this case, args[-1] will be future_object_with_information, args[-2] will be url_name and args[-3] will be task_number, and rest of parameters will be available in args[0] to onwards.
+* users can also use: hello(*args) signature, in case arbitrary number of parameters have been passed to hello. In this case, args[-1] will be future_object_with_information, args[-2] will be url_name and args[-3] will be task_number, and rest of parameters will be available in args[0] to onwards.
     
-    * About future_object_with_information: lets call it future. Result of future is available in future.result()
+* About future_object_with_information: lets call it future. Result of future is available in future.result()
     
-    * Accessing information from future_object: Consider following sample hello callback function:
+* Accessing information from future_object: Consider following sample hello callback function:
         
         def hello(*args):
             future = args[-1]
@@ -67,7 +67,7 @@ Experimental async http request library for python with focus on simplicity
             content_length = header_info['content-length']
             #check header_info for more details
     
-    * If users want different callback function with different parameters for every url. Then they should use vnt.add() after every vnt.get(). See following sample code:
+* If users want different callback function with different parameters for every url. Then they should use vnt.add() after every vnt.get(). See following sample code:
     
         hdr = {"User-Agent":"Mozilla/5.0"}
         vnt = Vinanti(block=True)
@@ -76,7 +76,7 @@ Experimental async http request library for python with focus on simplicity
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
         vnt.start()
         
-    * Check **tests** folder, to know more about api usage. 
+* Check **tests** folder, to know more about api usage. 
     
 ### Motivation for writing the library
 
