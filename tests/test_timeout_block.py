@@ -1,4 +1,3 @@
-#!/bin/bash/env python
 """
 Copyright (C) 2018 kanishka-linux kanishka.linux@gmail.com
 
@@ -21,10 +20,14 @@ along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 import os
 import sys
 import unittest
+from functools import partial
 
 def hello(*args):
     future = args[-1]
     result = future.result()
+    if len(args) > 3:
+        new_args = args[:-3]
+        print(new_args)
     if result:
         info = result.info
         if info:
@@ -75,6 +78,18 @@ class TestVinanti(unittest.TestCase):
         urls = ['http://httpbin.org/get', 'http://httpbin.org/get']
         vnt = Vinanti(block=True)
         vnt.get(urls, onfinished=hello, hdrs=self.hdr, params={'billoo':'diamond comics', 'dhruva':'raj comics'}, timeout=0.5)
+        vnt.start()
+        
+    def test_without_hdrs(self):
+        urls = ['https://news.ycombinator.com/news', 'https://github.com/']
+        vnt = Vinanti(block=True)
+        vnt.get(urls, onfinished=partial(hello, 'test_without_hdrs'), timeout=1.0)
+        vnt.start()
+        
+    def test_without_callback(self):
+        urls = ['https://news.ycombinator.com/news', 'https://github.com/']
+        vnt = Vinanti(block=True)
+        vnt.get(urls, timeout=1.0)
         vnt.start()
         
 if __name__ == '__main__':
