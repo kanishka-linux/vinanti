@@ -76,7 +76,7 @@ Experimental async http request library for python with focus on simplicity
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
         vnt.start()
         
-* Check **tests** folder, to know more about api usage. 
+* Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage. 
     
 ### Motivation for writing the library
 
