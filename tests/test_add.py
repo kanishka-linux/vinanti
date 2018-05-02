@@ -3,11 +3,16 @@ import sys
 import unittest
 from functools import partial
 
+hdr = {"User-Agent":"Mozilla/5.0"}
 
 def hello(*args):
     print('hello: {}'.format(args[-2]))
+    vnt = Vinanti(block=False)
+    vnt.get('http://www.google.com',onfinished=namaste, hdrs=hdr)
+    vnt.add('http://www.google.com',onfinished=konichiwa, hdrs=hdr)
+    vnt.start()
 
-    
+
 def namaste(*args):
     print('namaste: {}'.format(args[-2]))
 
@@ -18,20 +23,18 @@ def konichiwa(*args):
 
 class TestVinanti(unittest.TestCase):
     
-    hdr = {"User-Agent":"Mozilla/5.0"}
-    
     def test_add_block(self):
         vnt = Vinanti(block=True)
-        vnt.get('http://www.google.com',onfinished=hello, hdrs=self.hdr)
-        vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=self.hdr)
-        vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=self.hdr)
+        vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
+        vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
+        vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
         vnt.start()
         
     def test_add_noblock(self):
         vnt = Vinanti(block=False)
-        vnt.get('http://www.google.com',onfinished=hello, hdrs=self.hdr)
-        vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=self.hdr)
-        vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=self.hdr)
+        vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
+        vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
+        vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
         vnt.start()
 
         
