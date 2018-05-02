@@ -17,7 +17,7 @@ You should have received a copy of the GNU General Public License
 along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-
+import shutil
 import urllib.parse
 import urllib.request
 
@@ -35,6 +35,7 @@ class RequestObject:
         self.error = None
         self.data = None
         self.timeout = self.kargs.get('timeout')
+        self.out = self.kargs.get('out')
         self.__init_extra__()
     
     def __init_extra__(self):
@@ -74,13 +75,17 @@ class CreateReturnObject:
         self.method = parent.method
         self.error = parent.error
         if req:
-            if parent.method == 'HEAD':
-                self.html = 'None'
-            else:
-                self.html = req.read().decode('utf-8')
             self.info = req.info()
             self.url = req.geturl()
             self.status = req.getcode()
+            if parent.method == 'HEAD':
+                self.html = 'None'
+            elif parent.out:
+                with open(parent.out, 'wb') as out_file:
+                    shutil.copyfileobj(req, out_file)
+                self.html = 'file saved to {}'.format(parent.out)
+            else:
+                self.html = req.read().decode('utf-8')
         else:
             self.html = None
             self.info = None
