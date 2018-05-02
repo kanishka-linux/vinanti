@@ -19,36 +19,41 @@ You should have received a copy of the GNU General Public License
 along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 """
 
-import urllib.request
+
 import urllib.parse
+import urllib.request
+
 
 class RequestObject:
     
     def __init__(self, url, hdrs, method, kargs):
         self.url = url
         self.hdrs = hdrs
-        if not self.hdrs:
-            self.hdrs = {"User-Agent":"Mozilla/5.0"}
         self.kargs = kargs
         self.html = None
         self.status = None
         self.info = None
         self.url = url
         self.method = method
+        self.error = None
+        self.data = None
+        self.timeout = self.kargs.get('timeout')
+        self.__init_extra__()
+    
+    def __init_extra__(self):
+        if not self.hdrs:
+            self.hdrs = {"User-Agent":"Mozilla/5.0"}
         if not self.method:
             self.method = 'GET'
-        self.timeout = kargs.get('timeout')
-        self.error = None
         if not self.timeout:
             self.timeout = None
-        self.data = None
         if self.method == 'POST':
-            self.data = kargs.get('data')
+            self.data = self.kargs.get('data')
             if self.data:
                 self.data = urllib.parse.urlencode(self.data)
                 self.data = self.data.encode('utf-8')
         elif self.method == 'GET':
-            payload = kargs.get('params')
+            payload = self.kargs.get('params')
             if payload:
                 payload = urllib.parse.urlencode(payload)
                 self.url = self.url + '?' + payload
