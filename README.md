@@ -13,7 +13,7 @@ Experimental async http request library for python with focus on simplicity
 			
 ### Uninstall
 		
-		$ sudo pip3 uninstall vinanti
+		$ sudo pip3 uninstall vinanti (OR pip uninstall vinanti)
 		
 
 ### Let's Discuss some code:
