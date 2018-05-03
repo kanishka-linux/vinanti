@@ -20,6 +20,11 @@ along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 import shutil
 import urllib.parse
 import urllib.request
+try:
+    from vinanti.log import log_function
+except ImportError:
+    from log import log_function
+logger = log_function(__name__)
 
 
 class RequestObject:
@@ -34,6 +39,9 @@ class RequestObject:
         self.method = method
         self.error = None
         self.data = None
+        self.log = kargs.get('log')
+        if not self.log:
+            logger.disabled = True
         self.timeout = self.kargs.get('timeout')
         self.out = self.kargs.get('out')
         self.__init_extra__()
@@ -65,6 +73,7 @@ class RequestObject:
         except Exception as err:
             r_open = None
             self.error = str(err)
+            logger.error(err)
         ret_obj = CreateReturnObject(self, r_open)
         return ret_obj
         
