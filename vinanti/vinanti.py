@@ -23,15 +23,18 @@ import urllib.request
 from functools import partial
 from threading import Thread
 from collections import OrderedDict
-
 try:
     from vinanti.req import RequestObject
+    from vinanti.log import log_function
 except ImportError:
     from req import RequestObject
+    from log import log_function
+logger = log_function(__name__)
+
 
 class Vinanti:
     
-    def __init__(self, backend=None, block=None):
+    def __init__(self, backend=None, block=None, log=None):
         if backend is None:
             self.backend = 'urllib'
         else:
@@ -43,6 +46,9 @@ class Vinanti:
         self.loop = asyncio.get_event_loop()
         self.tasks = OrderedDict()
         self.loop_nonblock_list = []
+        self.log = log
+        if not self.log:
+            logger.disabled = True
         
     def clear(self):
         self.tasks.clear()
@@ -83,10 +89,14 @@ class Vinanti:
             url, onfinished, hdrs, method, kargs = tasks_dict[i]
             tasks.append(asyncio.ensure_future(self.__start_fetching__(url, onfinished, hdrs, i, loop, method, kargs))) 
         loop.run_until_complete(asyncio.gather(*tasks))
+        loop.close()
         
     def start(self):
         if self.block:
-            self.__event_loop__(self.tasks)
+            if not self.loop.is_running():
+                self.__event_loop__(self.tasks)
+            else:
+                logger.debug('loop running: {}'.format(self.loop.is_running()))
         else:
             new_loop = asyncio.new_event_loop()
             loop_thread = Thread(target=self.__start_non_block_loop__, args=(self.tasks, new_loop))
@@ -99,9 +109,10 @@ class Vinanti:
             url, onfinished, hdrs, method, kargs = tasks_dict[i]
             tasks.append(asyncio.ensure_future(self.__start_fetching__(url, onfinished, hdrs, i, self.loop, method, kargs))) 
         self.loop.run_until_complete(asyncio.gather(*tasks))
-    
+        
     def __get_request__(self, url, hdrs, method, kargs):
         req_obj = None
+        kargs.update({'log':self.log})
         if self.backend == 'urllib':
             req = RequestObject(url, hdrs, method, kargs)
             req_obj = req.process_request()
