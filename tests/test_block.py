@@ -56,6 +56,8 @@ class TestVinanti(unittest.TestCase):
         vnt = Vinanti(block=True)
         vnt.get(self.urls, onfinished=hello, hdrs=self.hdr)
         vnt.start()
+        vnt.get(self.urls, onfinished=hello, hdrs=self.hdr)
+        vnt.start()
         
     def test_head(self):
         vnt = Vinanti(block=True)
