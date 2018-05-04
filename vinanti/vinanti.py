@@ -128,6 +128,7 @@ class Vinanti:
     
     async def __start_fetching__(self, url, onfinished, hdrs, task_num, loop, method, kargs):
         if isinstance(url, str):
+            logger.info('\nRequesting url: {}\n'.format(url))
             future = loop.run_in_executor(None, self.__get_request__, url, hdrs, method, kargs)
         else:
             future = loop.run_in_executor(None, self.__complete_request__, url, hdrs, method, kargs)
