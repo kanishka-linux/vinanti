@@ -17,6 +17,7 @@ You should have received a copy of the GNU General Public License
 along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import time
 import shutil
 import urllib.parse
 import urllib.request
@@ -40,6 +41,7 @@ class RequestObject:
         self.error = None
         self.data = None
         self.log = kargs.get('log')
+        self.wait = kargs.get('wait')
         if not self.log:
             logger.disabled = True
         self.timeout = self.kargs.get('timeout')
@@ -47,6 +49,8 @@ class RequestObject:
         self.__init_extra__()
     
     def __init_extra__(self):
+        if self.wait:
+            logger.debug('Waiting for {} seconds: {}'.format(self.wait, self.url))
         if not self.hdrs:
             self.hdrs = {"User-Agent":"Mozilla/5.0"}
         if not self.method:
@@ -65,6 +69,8 @@ class RequestObject:
                 self.url = self.url + '?' + payload
                 
     def process_request(self):
+        if self.wait:
+            time.sleep(self.wait)
         req = urllib.request.Request(self.url, data=self.data,
                                      headers=self.hdrs,
                                      method=self.method)
