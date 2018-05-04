@@ -6,20 +6,23 @@ from functools import partial
 hdr = {"User-Agent":"Mozilla/5.0"}
 
 def hello(*args):
-    print('hello: {}'.format(args[-2]))
-    vnt = Vinanti(block=False)
-    vnt.get('http://www.google.com',onfinished=namaste, hdrs=hdr)
-    vnt.add('http://www.google.com',onfinished=konichiwa, hdrs=hdr)
-    vnt.start()
-
+    result = args[-1].result()
+    print('hello: {} {}'.format(args[-2], result.method))
 
 def namaste(*args):
-    print('namaste: {}'.format(args[-2]))
+    result = args[-1].result()
+    print('namaste: {} {}'.format(args[-2], result.method))
 
     
 def konichiwa(*args):
-    print('konichiwa: {}'.format(args[-2]))
+    result = args[-1].result()
+    print('konichiwa: {} {}'.format(args[-2], result.method))
 
+def bonjour(*args):
+    result = args[-1].result()
+    print('bonjour: {} {}'.format(args[-2], result.method))
+    print(result.html)
+    
 
 class TestVinanti(unittest.TestCase):
     
@@ -28,6 +31,8 @@ class TestVinanti(unittest.TestCase):
         vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
+        vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data=(('moe', 'curly'), ('moe', 'larry')))
+        vnt.add('http://httpbin.org/get', method='HEAD', onfinished=hello, hdrs=hdr)
         vnt.start()
         
     def test_add_noblock(self):
@@ -35,6 +40,8 @@ class TestVinanti(unittest.TestCase):
         vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
+        vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data={'Fyodor Dostoyevsky':'Crime and Punishment', 'Shivaji Sawant':'Mrityunjaya'})
+        vnt.add('http://httpbin.org/get', method='HEAD', onfinished=hello, hdrs=hdr)
         vnt.start()
 
         
