@@ -74,6 +74,14 @@ class Vinanti:
     def head(self, urls, onfinished=None, hdrs=None, **kargs):
         self.__build_tasks__(urls, 'HEAD', onfinished, hdrs, kargs)
     
+    def function(self, urls, onfinished=None, **kargs):
+        self.__build_tasks__(urls, 'FUNCTION', onfinished, None, kargs)
+        
+    def function_add(self, urls, onfinished=None, **kargs):
+        task_list = [urls, onfinished, None, 'FUNCTION', kargs]
+        length = len(self.tasks)
+        self.tasks.update({length:task_list})
+    
     def add(self, urls, onfinished=None, hdrs=None, method=None, **kargs):
         if method is None:
             method = 'GET'
@@ -119,7 +127,14 @@ class Vinanti:
         return req_obj
     
     async def __start_fetching__(self, url, onfinished, hdrs, task_num, loop, method, kargs):
-        future = loop.run_in_executor(None, self.__get_request__, url, hdrs, method, kargs)
+        if isinstance(url, str):
+            future = loop.run_in_executor(None, self.__get_request__, url, hdrs, method, kargs)
+        else:
+            future = loop.run_in_executor(None, self.__complete_request__, url, hdrs, method, kargs)
         if onfinished:
             future.add_done_callback(partial(onfinished, task_num, url))
         response = await future
+        
+    def __complete_request__(self, url, args, method, kargs):
+        req_obj = url(**kargs)
+        return req_obj
