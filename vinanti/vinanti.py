@@ -34,15 +34,12 @@ logger = log_function(__name__)
 
 class Vinanti:
     
-    def __init__(self, backend=None, block=None, log=None):
+    def __init__(self, backend=None, block=True, log=False):
         if backend is None:
             self.backend = 'urllib'
         else:
             self.backend = backend
-        if block is None:
-            self.block = True
-        else:
-            self.block = block
+        self.block = block
         self.loop = asyncio.get_event_loop()
         self.tasks = OrderedDict()
         self.loop_nonblock_list = []
@@ -82,9 +79,7 @@ class Vinanti:
         length = len(self.tasks)
         self.tasks.update({length:task_list})
     
-    def add(self, urls, onfinished=None, hdrs=None, method=None, **kargs):
-        if method is None:
-            method = 'GET'
+    def add(self, urls, onfinished=None, hdrs=None, method="GET", **kargs):
         if isinstance(urls, str):
             task_list = [urls, onfinished, hdrs, method, kargs]
             length = len(self.tasks)
