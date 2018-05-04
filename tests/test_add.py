@@ -31,7 +31,8 @@ class TestVinanti(unittest.TestCase):
         vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
-        vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data=(('moe', 'curly'), ('moe', 'larry')))
+        data_post = (('moe', 'curly'), ('moe', 'larry'))
+        vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data=data_post)
         vnt.add('http://httpbin.org/get', method='HEAD', onfinished=hello, hdrs=hdr)
         vnt.start()
         
@@ -40,7 +41,8 @@ class TestVinanti(unittest.TestCase):
         vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
-        vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data={'Fyodor Dostoyevsky':'Crime and Punishment', 'Shivaji Sawant':'Mrityunjaya'})
+        data_dict = {'Fyodor Dostoyevsky':'Crime and Punishment', 'Shivaji Sawant':'Mrityunjaya'}
+        vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data=data_dict)
         vnt.add('http://httpbin.org/get', method='HEAD', onfinished=hello, hdrs=hdr)
         vnt.start()
 
