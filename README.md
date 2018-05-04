@@ -92,4 +92,4 @@ This library is highly experimental and currently only supports GET, POST and HE
 
 ### About word Vinanti
 
-It means **Request**, in author's [native language](https://en.wikipedia.org/wiki/Marathi_language).
+It means **Request**, in [Marathi](https://en.wikipedia.org/wiki/Marathi_language).
