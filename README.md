@@ -75,8 +75,25 @@ Experimental async http request library for python with focus on simplicity
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
         vnt.start()
-        
+
+### Sample API Usage
+
+Initiliaze: vnt = Vinanti(block=True) : block is boolean
+
+GET: vnt.get(url, onfinished=callback, hdr=header_dict, params=dictionary, wait=seconds, timeout=seconds, out=file_location)
+POST: vnt.post(url, onfinished=callback, hdr=header_dict, data=dictionary/tuple, wait=seconds, timeout=seconds)
+HEAD: vnt.head(url, onfinished=callback, hdr=header_dict, wait=seconds, timeout=seconds)
+
+url in above method can be single http url or list of urls
+
+ADD:  vnt.add(url, onfinished=callback, method=method, hdr=header_dict, params=dictionary, wait=seconds, timeout=seconds, data=dict/tuple)
+
+In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET.
+
+START Fetching: vnt.start()
+
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage. 
+
 
 ### Sample application using Vinanti
 
