@@ -78,19 +78,21 @@ Experimental async http request library for python with focus on simplicity
 
 ### Sample API Usage
 
-Initiliaze: vnt = Vinanti(block=True) : block is boolean
+* Initiliaze: vnt = Vinanti(block=True/False)
 
-GET: vnt.get(url, onfinished=callback, hdr=header_dict, params=dictionary, wait=seconds, timeout=seconds, out=file_location)
-POST: vnt.post(url, onfinished=callback, hdr=header_dict, data=dictionary/tuple, wait=seconds, timeout=seconds)
-HEAD: vnt.head(url, onfinished=callback, hdr=header_dict, wait=seconds, timeout=seconds)
+* GET: vnt.get(url, onfinished=callback, hdr=header_dict, params=dictionary, wait=seconds, timeout=seconds, out=file_location)
 
-url in above method can be single http url or list of urls
+* POST: vnt.post(url, onfinished=callback, hdr=header_dict, data=dictionary/tuple, wait=seconds, timeout=seconds)
 
-ADD:  vnt.add(url, onfinished=callback, method=method, hdr=header_dict, params=dictionary, wait=seconds, timeout=seconds, data=dict/tuple)
+* HEAD: vnt.head(url, onfinished=callback, hdr=header_dict, wait=seconds, timeout=seconds)
 
-In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET.
+Note: url in above methods can be single http url or list of urls
 
-START Fetching: vnt.start()
+* ADD:  vnt.add(url, onfinished=callback, method=method, hdr=header_dict, params=dictionary, wait=seconds, timeout=seconds, data=dict/tuple)
+
+Note: In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET.
+
+* START Fetching: vnt.start()
 
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage. 
 
