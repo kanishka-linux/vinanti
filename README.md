@@ -4,6 +4,8 @@ Experimental async http request library for python with focus on simplicity
 
 ### Installation
 
+        (Requires Python 3.5+, No other dependency)
+
 		$ git clone https://github.com/kanishka-linux/vinanti
 		$ cd vinanti
 		$ python3 setup.py sdist (or python setup.py sdist)
