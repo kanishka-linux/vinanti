@@ -22,6 +22,7 @@ import shutil
 import base64
 import urllib.parse
 import urllib.request
+#from urllib.parse import urlparse
 try:
     from vinanti.log import log_function
     from vinanti.formdata import Formdata
@@ -48,6 +49,7 @@ class RequestObject:
         self.proxies = kargs.get('proxies')
         self.auth = kargs.get('auth')
         self.files = kargs.get('files')
+        self.session_object = kargs.get('session')
         if not self.log:
             logger.disabled = True
         self.timeout = self.kargs.get('timeout')
@@ -130,6 +132,7 @@ class CreateReturnObject:
     def __init__(self, parent, req):
         self.method = parent.method
         self.error = parent.error
+        self.session_cookies = None
         if req:
             self.info = req.info()
             self.url = req.geturl()
@@ -142,8 +145,23 @@ class CreateReturnObject:
                 self.html = 'file saved to {}'.format(parent.out)
             else:
                 self.html = req.read().decode('utf-8')
+            self.set_session_cookies()
         else:
             self.html = None
             self.info = None
             self.status = None
             self.url = parent.url
+    
+    def set_session_cookies(self):
+        #o = urlparse(self.url)
+        for i in self.info.walk():
+            cookie_list = i.get_all('set-cookie')
+            cookie_jar = []
+            if cookie_list:
+                for i in cookie_list:
+                    cookie = i.split(';')[0]
+                    cookie_jar.append(cookie)
+                if cookie_jar:
+                    cookies = ';'.join(cookie_jar)
+                    self.session_cookies = cookies
+        
