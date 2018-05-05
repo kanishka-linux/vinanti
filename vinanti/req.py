@@ -24,8 +24,10 @@ import urllib.parse
 import urllib.request
 try:
     from vinanti.log import log_function
+    from vinanti.formdata import Formdata
 except ImportError:
     from log import log_function
+    from formdata import Formdata
 logger = log_function(__name__)
 
 
@@ -45,6 +47,7 @@ class RequestObject:
         self.wait = kargs.get('wait')
         self.proxies = kargs.get('proxies')
         self.auth = kargs.get('auth')
+        self.files = kargs.get('files')
         if not self.log:
             logger.disabled = True
         self.timeout = self.kargs.get('timeout')
@@ -52,6 +55,7 @@ class RequestObject:
         self.__init_extra__()
     
     def __init_extra__(self):
+        self.data_old = None
         if self.wait:
             logger.debug('Waiting for {} seconds: {}'.format(self.wait, self.url))
         if not self.hdrs:
@@ -63,6 +67,7 @@ class RequestObject:
         if self.method == 'POST':
             self.data = self.kargs.get('data')
             if self.data:
+                self.data_old = self.data
                 self.data = urllib.parse.urlencode(self.data)
                 self.data = self.data.encode('utf-8')
         elif self.method == 'GET':
@@ -70,7 +75,16 @@ class RequestObject:
             if payload:
                 payload = urllib.parse.urlencode(payload)
                 self.url = self.url + '?' + payload
-                
+        if self.files:
+            if self.data:
+                mfiles = Formdata(self.data_old, self.files)
+            else:
+                mfiles = Formdata({}, self.files)
+            data, hdr = mfiles.create_content()
+            for key, value in hdr.items():
+                self.hdrs.update({key:value})
+            self.data = data
+        
     def process_request(self):
         opener = None
         if self.wait:
@@ -109,7 +123,8 @@ class RequestObject:
         proxy_handler = urllib.request.ProxyHandler(self.proxies)
         opener = urllib.request.build_opener(http_handler, proxy_handler)
         return opener
-
+        
+        
 class CreateReturnObject:
     
     def __init__(self, parent, req):
