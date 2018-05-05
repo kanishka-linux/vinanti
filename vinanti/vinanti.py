@@ -95,6 +95,7 @@ class Vinanti:
         loop.close()
         
     def start(self):
+        logger.info(self.tasks)
         if self.block:
             if not self.loop.is_running():
                 self.__event_loop__(self.tasks)
