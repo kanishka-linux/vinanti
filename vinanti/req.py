@@ -19,6 +19,7 @@ along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 
 import time
 import shutil
+import base64
 import urllib.parse
 import urllib.request
 try:
@@ -42,6 +43,8 @@ class RequestObject:
         self.data = None
         self.log = kargs.get('log')
         self.wait = kargs.get('wait')
+        self.proxies = kargs.get('proxies')
+        self.auth = kargs.get('auth')
         if not self.log:
             logger.disabled = True
         self.timeout = self.kargs.get('timeout')
@@ -69,20 +72,43 @@ class RequestObject:
                 self.url = self.url + '?' + payload
                 
     def process_request(self):
+        opener = None
         if self.wait:
             time.sleep(self.wait)
+        if self.proxies:
+            opener = self.add_proxy()
         req = urllib.request.Request(self.url, data=self.data,
                                      headers=self.hdrs,
                                      method=self.method)
+        if self.auth:
+            req = self.add_basic_auth(req)
         try: 
-            r_open = urllib.request.urlopen(req, timeout=self.timeout)
+            if opener:
+                r_open = opener.open(req, timeout=self.timeout)
+            else:
+                r_open = urllib.request.urlopen(req, timeout=self.timeout)
         except Exception as err:
             r_open = None
             self.error = str(err)
             logger.error(err)
         ret_obj = CreateReturnObject(self, r_open)
         return ret_obj
-        
+    
+    def add_basic_auth(self, req):
+        credentials = '{}:{}'.format(self.auth[0], self.auth[1])
+        encoded_credentials = base64.b64encode(bytes(credentials, 'utf-8'))
+        req.add_header('Authorization', 'Basic {}'.format(encoded_credentials.decode('utf-8')))
+        return req
+    
+    def add_proxy(self):
+        logger.info('proxies {}'.format(self.proxies))
+        if self.url.startswith('http'):
+            http_handler = urllib.request.HTTPHandler()
+        else:
+            http_handler = urllib.request.HTTPSHandler()
+        proxy_handler = urllib.request.ProxyHandler(self.proxies)
+        opener = urllib.request.build_opener(http_handler, proxy_handler)
+        return opener
 
 class CreateReturnObject:
     
