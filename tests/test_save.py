@@ -12,17 +12,14 @@ def hello(*args):
     if result:
         info = result.info
         if info:
-            print('{} {} {} {} error={} {}'.format(
-                    result.url, result.status, info['content-type'],
-                    result.method, result.error, result.html
-                    )
-                )
+            content_type = info['content-type']
         else:
-            print('{} {} {} error={}'.format(
-                    result.url, result.status, result.method,
-                    result.error
-                    )
+            content_type = 'Not Available'
+        print('{} {} {} {} error={} cookies={}'.format(
+                result.url, result.status, content_type,
+                result.method, result.error, result.session_cookies
                 )
+            )
 
 
 class TestVinanti(unittest.TestCase):
