@@ -21,7 +21,7 @@ from setuptools import setup
 
 setup(
     name='vinanti',
-    version='0.1',
+    version='0.2',
     license='LGPLv3',
     author='kanishka-linux',
     author_email='kanishka.linux@gmail.com',
