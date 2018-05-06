@@ -142,7 +142,9 @@ Experimental async http request library for python with focus on simplicity
         
         proxies = {'http': 'http://192.168.2.10:8000/'}
         
-        files = '/tmp/file1.txt' or ('/tmp/file1.txt', '/tmp/file2.txt')  
+        files = '/tmp/file1.txt' or ('/tmp/file1.txt', '/tmp/file2.txt') 
+        
+                OR {'file1': '/tmp/file1.txt', 'file2': '/tmp/file2.txt'}
         
         auth = ('user', 'passwd')
         
