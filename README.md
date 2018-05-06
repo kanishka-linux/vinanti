@@ -112,37 +112,37 @@ Async http request library for python with focus on simplicity
 
 * Some other parameters:
 
-        1. params = dict {use with GET}
+        * params = dict {use with GET}
         
         eg. params = {key: value}
         
-        2. data = dict/tuple {use with POST} 
+        * data = dict/tuple {use with POST} 
         
         eg. data = {key: value} or ((key, value1), (key, value2))
         
-        3. wait = In seconds {wait for seconds before making request}
+        * wait = In seconds {wait for seconds before making request}
         
         eg. wait = 1.0
         
-        4. timeout = In seconds
+        * timeout = In seconds
         
         eg. timeout = 4.0
         
-        5. out = output file {save output to this file}
+        * out = output file {save output to this file}
         
         eg. out = '/tmp/sample.html'
         
-        6. proxies = dict {type: proxy_server}
+        * proxies = dict {type: proxy_server}
         
         eg. proxies = {'http': 'http://192.168.2.10:8000/'}
         
-        7. files = file or tuple of files to upload (use with POST)
+        * files = file or tuple of files to upload (use with POST)
         
         eg. files = '/tmp/file1.txt' or ('/tmp/file1.txt', '/tmp/file2.txt') 
         
                     OR {'file1': '/tmp/file1.txt', 'file2': '/tmp/file2.txt'}
         
-        8. auth = basic http auth
+        * auth = basic http auth
         
         eg. auth = ('user', 'passwd')
         
