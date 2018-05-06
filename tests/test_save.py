@@ -15,9 +15,10 @@ def hello(*args):
             content_type = info['content-type']
         else:
             content_type = 'Not Available'
-        print('{} {} {} {} error={} cookies={}'.format(
+        print('{} {} {} {} error={} cookies={} out-file={}'.format(
                 result.url, result.status, content_type,
-                result.method, result.error, result.session_cookies
+                result.method, result.error, result.session_cookies,
+                result.html
                 )
             )
 
