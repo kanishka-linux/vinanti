@@ -121,7 +121,7 @@ Experimental async http request library for python with focus on simplicity
         
         proxies = dict {type: proxy_server}
         
-        files = file or tuple of files to upload (use with post)
+        files = file or tuple of files to upload (use with POST)
         
         auth = {basic http auth}
         
