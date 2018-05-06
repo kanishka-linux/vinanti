@@ -1,6 +1,6 @@
 # Vinanti
 
-Experimental async http request library for python with focus on simplicity
+Async http request library for python with focus on simplicity
 
 ### Installation
 
@@ -114,43 +114,39 @@ Experimental async http request library for python with focus on simplicity
 
         params = dict {use with GET}
         
+        eg. params = {key: value}
+        
         data = dict/tuple {use with POST} 
+        
+        eg. data = {key: value} or ((key, value1), (key, value2))
         
         wait = In seconds {wait for seconds before making request}
         
+        eg. wait = 1.0
+        
         timeout = In seconds
+        
+        eg. timeout = 4.0
         
         out = output file {save output to this file}
         
+        eg. out = '/tmp/sample.html'
+        
         proxies = dict {type: proxy_server}
+        
+        eg. proxies = {'http': 'http://192.168.2.10:8000/'}
         
         files = file or tuple of files to upload (use with POST)
         
+        eg. files = '/tmp/file1.txt' or ('/tmp/file1.txt', '/tmp/file2.txt') 
+        
+                    OR {'file1': '/tmp/file1.txt', 'file2': '/tmp/file2.txt'}
+        
         auth = basic http auth
         
-        Examples: 
+        eg. auth = ('user', 'passwd')
         
-        params = {key: value}
-        
-        data = {key: value} or ((key, value1), (key, value2))
-        
-        wait = 1.0
-        
-        timeout = 4.0
-        
-        out = '/tmp/sample.html'
-        
-        proxies = {'http': 'http://192.168.2.10:8000/'}
-        
-        files = '/tmp/file1.txt' or ('/tmp/file1.txt', '/tmp/file2.txt') 
-        
-                OR {'file1': '/tmp/file1.txt', 'file2': '/tmp/file2.txt'}
-        
-        auth = ('user', 'passwd')
-        
-
-* Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage. 
-
+* Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
 ### Sample application using Vinanti
 
