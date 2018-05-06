@@ -134,24 +134,27 @@ class CreateReturnObject:
         self.error = parent.error
         self.session_cookies = None
         if req:
-            self.info = req.info()
-            self.url = req.geturl()
-            self.status = req.getcode()
-            if parent.method == 'HEAD':
-                self.html = 'None'
-            elif parent.out:
-                with open(parent.out, 'wb') as out_file:
-                    shutil.copyfileobj(req, out_file)
-                self.html = 'file saved to {}'.format(parent.out)
-            else:
-                self.html = req.read().decode('utf-8')
+            self.set_information(req, parent)
             self.set_session_cookies()
         else:
             self.html = None
             self.info = None
             self.status = None
             self.url = parent.url
-    
+            
+    def set_information(self, req, parent):
+        self.info = req.info()
+        self.url = req.geturl()
+        self.status = req.getcode()
+        if parent.method == 'HEAD':
+            self.html = 'None'
+        elif parent.out:
+            with open(parent.out, 'wb') as out_file:
+                shutil.copyfileobj(req, out_file)
+            self.html = 'file saved to {}'.format(parent.out)
+        else:
+            self.html = req.read().decode('utf-8')
+            
     def set_session_cookies(self):
         #o = urlparse(self.url)
         for i in self.info.walk():
