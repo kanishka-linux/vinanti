@@ -56,7 +56,9 @@ Experimental async http request library for python with focus on simplicity
             future = args[-1]
             url_submitted = args[-2]
             task_number = args[-3] # Sequential number of url in url_list
+            
             result = future.result()
+            
             html = result.html #text/html content of fetched url 
             method = result.method #GET,POST, HEAD
             error = result.error #Error information if fetching failed
