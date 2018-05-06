@@ -18,16 +18,17 @@ along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 """
 
 import os
+import uuid
 import hashlib
 import mimetypes
 
 class Formdata:
     
-    def __init__(self, form_dict, file_tuple):
+    def __init__(self, form_dict, file_dict):
         self.form_dict = form_dict
-        self.file_tuple = file_tuple
+        self.file_dict = file_dict
         self.final_list = []
-        boundary = '$@@#$#$#$#$#$#$#$#$#$#$#$#$#$@@$'
+        boundary = str(uuid.uuid4())
         boundary_bytes = bytes(boundary, 'utf-8')
         h = hashlib.sha256(boundary_bytes)
         self.boundary = h.hexdigest()
@@ -35,9 +36,9 @@ class Formdata:
     def get_content_type(self, filename):
         return mimetypes.guess_type (filename)[0] or 'application/octet-stream'
     
-    def arrange_files(self, value, boundary, new_boundary=None):
-        file_type = self.get_content_type(value)
-        file_name = os.path.basename(value)
+    def arrange_files(self, file_title, file_path, boundary, new_boundary=None):
+        file_type = self.get_content_type(file_path)
+        file_name = os.path.basename(file_path)
         if new_boundary:
             self.final_list.append(bytes(new_boundary, 'utf-8'))
         else:
@@ -45,12 +46,12 @@ class Formdata:
         if new_boundary:
             hdr = 'Content-Disposition: file; filename="{}"'.format('files', file_name)
         else:
-            hdr = 'Content-Disposition: form-data; name="filedata"; filename="{}"'.format(file_name)
+            hdr = 'Content-Disposition: form-data; name="{}"; filename="{}"'.format(file_title, file_name)
         self.final_list.append(bytes(hdr, 'utf-8'))
         hdr = 'Content-Type: {}'.format(file_type)
         self.final_list.append(bytes(hdr, 'utf-8'))
         self.final_list.append(b'')
-        with open(value, 'rb') as f:
+        with open(file_path, 'rb') as f:
             content = f.read()
             self.final_list.append(content)
         
@@ -62,16 +63,20 @@ class Formdata:
             self.final_list.append(bytes(hdr, 'utf-8'))
             self.final_list.append(b'')
             self.final_list.append(bytes(value, 'utf-8'))
-        if self.file_tuple and isinstance(self.file_tuple, str):
-            self.arrange_files(self.file_tuple, boundary)
-        else:
-            for value in self.file_tuple:
-                self.arrange_files(value, boundary)
+        if self.file_dict and isinstance(self.file_dict, str):
+            self.arrange_files('filedata', self.file_dict, boundary)
+        elif self.file_dict and isinstance(self.file_dict, tuple):
+            for i, value in enumerate(self.file_dict):
+                title = 'filedata-{}'.format(i)
+                self.arrange_files(title, value, boundary)
+        elif self.file_dict and isinstance(self.file_dict, dict):
+            for key, value in self.file_dict.items():
+                self.arrange_files(key, value, boundary)
         self.final_list.append(bytes(boundary+'--', 'utf-8'))
         self.final_list.append(b'')
         body = b'\r\n'.join (self.final_list)
         headers = {
-            'Content-Type': 'multipart/form-data; boundary={}'.format(boundary),
+            'Content-Type': 'multipart/form-data; boundary={}'.format(self.boundary),
             'Content-Length': str(len(body))
             }
         return body, headers
