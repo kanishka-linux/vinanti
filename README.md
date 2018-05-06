@@ -101,7 +101,7 @@ Experimental async http request library for python with focus on simplicity
         
         vnt.add(url, onfinished=callback, method=method, hdr=header_dict)
         
-* Note: In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET. First fetch command of any session (before vnt.start()) should never start with vnt.add(). First fetch command should be always vnt.add or vnt.post or vnt.head.
+* Note: In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET. First fetch command of any session (before vnt.start()) should never start with vnt.add(). First fetch command should be always vnt.get() or vnt.post() or vnt.head().
 
 * START Fetching: 
         
