@@ -56,15 +56,14 @@ Experimental async http request library for python with focus on simplicity
             future = args[-1]
             url_submitted = args[-2]
             task_number = args[-3] # Sequential number of url in url_list
-            
             result = future.result()
-            
             html = result.html #text/html content of fetched url 
             method = result.method #GET,POST, HEAD
             error = result.error #Error information if fetching failed
             url = result.url #Final url location which is fetched
             status_code = result.status #Status code
             header_info = result.info # Dictionary of header information
+            cookies = result.session_cookies #If available
             content_type = header_info['content-type'] 
             content_length = header_info['content-length']
             #check header_info for more details
@@ -86,27 +85,64 @@ Experimental async http request library for python with focus on simplicity
 
 * GET: 
         
-        vnt.get(url, onfinished=callback, hdr=header_dict, params=dictionary, wait=seconds, timeout=seconds, out=file_location)
+        vnt.get(url, onfinished=callback, hdrs=header_dict)
 
 * POST: 
         
-        vnt.post(url, onfinished=callback, hdr=header_dict, data=dictionary/tuple, wait=seconds, timeout=seconds)
+        vnt.post(url, onfinished=callback, hdrs=header_dict)
 
 * HEAD: 
         
-        vnt.head(url, onfinished=callback, hdr=header_dict, wait=seconds, timeout=seconds)
+        vnt.head(url, onfinished=callback, hdrs=header_dict)
 
 * Note: url in above methods can be single http url or list of urls
 
 * ADD:  
         
-        vnt.add(url, onfinished=callback, method=method, hdr=header_dict, params=dictionary, wait=seconds, timeout=seconds, data=dict/tuple)
-
+        vnt.add(url, onfinished=callback, method=method, hdr=header_dict)
+        
 * Note: In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET.
 
 * START Fetching: 
         
         vnt.start()
+
+* Some other parameters:
+
+        params = dict {use with GET}
+        
+        data = dict/tuple {use with POST} 
+        
+        wait = In seconds {wait for seconds before making request}
+        
+        timeout = In seconds
+        
+        out = output file {save output to this file}
+        
+        proxies = dict {type: proxy_server}
+        
+        files = file or tuple of files to upload (use with post)
+        
+        auth = {basic http auth}
+        
+        Examples: 
+        
+        params = {key: value}
+        
+        data = {key: value} or ((key, value1), (key, value2))
+        
+        wait = 1.0
+        
+        timeout = 4.0
+        
+        out = '/tmp/sample.html'
+        
+        proxies = {'http': 'http://192.168.2.10:8000/'}
+        
+        files = '/tmp/file1.txt' or ('/tmp/file1.txt', '/tmp/file2.txt')  
+        
+        auth = ('user', 'passwd')
+        
 
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage. 
 
@@ -121,7 +157,7 @@ Async/await is a great feature of python, but at the same time pretty confusing.
 
 ### Caution
 
-This library is highly experimental and currently only supports GET, POST and HEAD requests in limited manner. There is no support for cookies or uploading files at the moment. If program looks stable after thorough testing, only then other advance features will be added to it. It is working fine within small programs. But, I don't know how it will behave in large complex program. So, for a time being just play with it and don't use it in production till it achieves maturity. 
+This library is highly experimental and currently only supports GET, POST and HEAD requests in limited manner. If program looks stable after thorough testing, only then other advance features will be added to it. It is working fine within small programs. But, I don't know how it will behave in large complex program. So, for a time being just play with it and don't use it in production till it achieves maturity. 
 
 ### About word Vinanti
 
