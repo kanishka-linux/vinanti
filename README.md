@@ -64,8 +64,9 @@ Experimental async http request library for python with focus on simplicity
             error = result.error #Error information if fetching failed
             url = result.url #Final url location which is fetched
             status_code = result.status #Status code
-            header_info = result.info # Dictionary of header information
             cookies = result.session_cookies #If available
+            
+            header_info = result.info # Dictionary of header information
             content_type = header_info['content-type'] 
             content_length = header_info['content-length']
             #check header_info for more details
