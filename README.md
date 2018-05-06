@@ -110,7 +110,7 @@ Async http request library for python with focus on simplicity
         
         vnt.start()
 
-* Some other parameters:
+* Some other parameters which can be passed to get, post, head and add functions:
 
         * params = dict {use with GET}
         
