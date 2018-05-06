@@ -155,10 +155,6 @@ A sample application using Vinati is available [here](https://github.com/kanishk
 
 Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make simple url requests and that too in mostly synchronous code. So accordingly, this library has been designed with as simple api as possible, with everything about content will be handled by callback function.
 
-### Caution
-
-This library is highly experimental and currently only supports GET, POST and HEAD requests in limited manner. If program looks stable after thorough testing, only then other advance features will be added to it. It is working fine within small programs. But, I don't know how it will behave in large complex program. So, for a time being just play with it and don't use it in production till it achieves maturity. 
-
 ### About word Vinanti
 
 It means **Request**, in [Marathi](https://en.wikipedia.org/wiki/Marathi_language).
