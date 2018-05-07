@@ -34,7 +34,7 @@ logger = log_function(__name__)
 
 class Vinanti:
     
-    def __init__(self, backend=None, block=True, log=False):
+    def __init__(self, backend=None, block=True, log=False, **kargs):
         if backend is None:
             self.backend = 'urllib'
         else:
@@ -46,22 +46,49 @@ class Vinanti:
         self.log = log
         if not self.log:
             logger.disabled = True
+        self.global_param_list = ['method', 'hdrs', 'onfinished']
+        if kargs:
+            self.session_params = kargs
+            self.method_global = self.session_params.get('method')
+            self.hdrs_global = self.session_params.get('hdrs')
+            self.onfinished_global = self.session_params.get('onfinished')
+        else:
+            self.session_params = {}
+            self.method_global = 'GET'
+            self.hdrs_global = None
+            self.onfinished_global = None
         
     def clear(self):
         self.tasks.clear()
         self.loop_nonblock_list.clear()
+        self.session_params.clear()
     
     def __build_tasks__(self, urls, method, onfinished=None, hdrs=None, options_dict=None):
         self.tasks.clear()
         if options_dict is None:
             options_dict = {}
+        if self.session_params:
+            global_params = [method, hdrs, onfinished, options_dict]
+            method, onfinished, hdrs, options_dict = self.set_session_params(*global_params)
         if not isinstance(urls, list):
             urls = [urls]
         for url in urls:
             task_list = [url, onfinished, hdrs, method, options_dict]
             length = len(self.tasks)
             self.tasks.update({length:task_list})
-            
+    
+    def set_session_params(self, method, hdrs, onfinished, options_dict):
+        if not method and self.method_global:
+            method = self.method_global
+        if not hdrs and self.hdrs_global:
+            hdrs = self.hdrs_global.copy()
+        if not onfinished and self.onfinished_global:
+            onfinished = self.onfinished_global
+        for key, value in self.session_params.items():
+            if key not in options_dict and key not in self.global_param_list:
+                options_dict.update({key:value})
+        return method, onfinished, hdrs, options_dict
+    
     def get(self, urls, onfinished=None, hdrs=None, **kargs):
         self.__build_tasks__(urls, 'GET', onfinished, hdrs, kargs)
     
@@ -79,7 +106,10 @@ class Vinanti:
         length = len(self.tasks)
         self.tasks.update({length:task_list})
     
-    def add(self, urls, onfinished=None, hdrs=None, method="GET", **kargs):
+    def add(self, urls, onfinished=None, hdrs=None, method=None, **kargs):
+        if self.session_params:
+            global_params = [method, hdrs, onfinished, kargs]
+            method, onfinished, hdrs, kargs = self.set_session_params(*global_params)
         if isinstance(urls, str):
             task_list = [urls, onfinished, hdrs, method, kargs]
             length = len(self.tasks)
