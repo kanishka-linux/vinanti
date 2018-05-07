@@ -39,7 +39,9 @@ def hello(*args):
                 result.method, result.error, result.session_cookies
                 )
             )
-
+        if result.method.lower() in ['head', 'put', 'delete', 'patch', 'options']:
+            print(result.html)
+        
 class TestVinanti(unittest.TestCase):
     
     urls = [
@@ -88,6 +90,32 @@ class TestVinanti(unittest.TestCase):
         vnt = Vinanti(block=False)
         vnt.get(urls)
         vnt.start()
+    
+    def test_put(self):
+        urls = ['http://httpbin.org/put', 'http://httpbin.org/put']
+        vnt = Vinanti(block=False)
+        vnt.put(urls, onfinished=hello, hdrs=self.hdr, data={'calvin':'hobbes'})
+        vnt.start()
+        
+    def test_delete(self):
+        urls = ['http://httpbin.org/delete', 'http://httpbin.org/delete']
+        vnt = Vinanti(block=False)
+        vnt.delete(urls, onfinished=hello, hdrs=self.hdr, data={'garfield':'peanuts'})
+        vnt.start()
+    
+    def test_patch(self):
+        urls = ['http://httpbin.org/patch', 'http://httpbin.org/patch']
+        vnt = Vinanti(block=False)
+        vnt.patch(urls, onfinished=hello, hdrs=self.hdr, data={'gotham city':'rajnagar'})
+        vnt.start()
+        
+    def test_options(self):
+        urls = ['http://httpbin.org/get', 'http://httpbin.org/get']
+        vnt = Vinanti(block=False)
+        vnt.options(urls, onfinished=hello, hdrs=self.hdr)
+        vnt.start()
+        
+    
         
 if __name__ == '__main__':
     BASEDIR, BASEFILE = os.path.split(os.path.abspath(__file__))
