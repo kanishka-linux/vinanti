@@ -39,8 +39,10 @@ def hello(*args):
                 result.method, result.error, result.session_cookies
                 )
             )
-        if result.method.lower() in ['head', 'put', 'delete', 'patch', 'options']:
+        if result.method.lower() in ['put', 'delete', 'patch']:
             print(result.html)
+        elif result.method.lower() in ['head', 'options']:
+            print(info)
             
 
 class TestVinanti(unittest.TestCase):
