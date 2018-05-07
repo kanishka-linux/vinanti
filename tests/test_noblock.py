@@ -39,8 +39,10 @@ def hello(*args):
                 result.method, result.error, result.session_cookies
                 )
             )
-        if result.method.lower() in ['head', 'put', 'delete', 'patch', 'options']:
+        if result.method.lower() in ['put', 'delete', 'patch']:
             print(result.html)
+        elif result.method.lower() in ['head', 'options']:
+            print(info)
         
 class TestVinanti(unittest.TestCase):
     
@@ -108,7 +110,7 @@ class TestVinanti(unittest.TestCase):
         vnt = Vinanti(block=False)
         vnt.patch(urls, onfinished=hello, hdrs=self.hdr, data={'gotham city':'rajnagar'})
         vnt.start()
-        
+    
     def test_options(self):
         urls = ['http://httpbin.org/get', 'http://httpbin.org/get']
         vnt = Vinanti(block=False)
