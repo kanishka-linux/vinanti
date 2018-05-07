@@ -50,7 +50,6 @@ class RequestObject:
         self.auth = kargs.get('auth')
         self.auth_digest = kargs.get('auth_digest')
         self.files = kargs.get('files')
-        self.session_object = kargs.get('session')
         if not self.log:
             logger.disabled = True
         self.timeout = self.kargs.get('timeout')
