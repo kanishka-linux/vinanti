@@ -98,6 +98,18 @@ class Vinanti:
     def head(self, urls, onfinished=None, hdrs=None, **kargs):
         self.__build_tasks__(urls, 'HEAD', onfinished, hdrs, kargs)
     
+    def put(self, urls, onfinished=None, hdrs=None, **kargs):
+        self.__build_tasks__(urls, 'PUT', onfinished, hdrs, kargs)
+        
+    def delete(self, urls, onfinished=None, hdrs=None, **kargs):
+        self.__build_tasks__(urls, 'DELETE', onfinished, hdrs, kargs)
+        
+    def options(self, urls, onfinished=None, hdrs=None, **kargs):
+        self.__build_tasks__(urls, 'OPTIONS', onfinished, hdrs, kargs)
+        
+    def patch(self, urls, onfinished=None, hdrs=None, **kargs):
+        self.__build_tasks__(urls, 'PATCH', onfinished, hdrs, kargs)
+    
     def function(self, urls, onfinished=None, **kargs):
         self.__build_tasks__(urls, 'FUNCTION', onfinished, None, kargs)
         

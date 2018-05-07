@@ -66,7 +66,7 @@ class RequestObject:
             self.method = 'GET'
         if not self.timeout:
             self.timeout = None
-        if self.method == 'POST':
+        if self.method in ['POST', 'PUT', 'DELETE', 'PATCH']:
             self.data = self.kargs.get('data')
             if self.data:
                 self.data_old = self.data
