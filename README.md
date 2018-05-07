@@ -138,7 +138,9 @@ Async http request library for python with focus on simplicity
         
                     OR {'file1': '/tmp/file1.txt', 'file2': '/tmp/file2.txt'}
         
-        * auth = ('user', 'passwd') #basic http auth
+        * auth = ('user', 'passwd') #http basic auth
+        
+        * auth_digest = ('user', 'passwd') #http digest auth
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
