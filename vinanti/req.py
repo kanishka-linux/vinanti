@@ -48,6 +48,7 @@ class RequestObject:
         self.wait = kargs.get('wait')
         self.proxies = kargs.get('proxies')
         self.auth = kargs.get('auth')
+        self.auth_digest = kargs.get('auth_digest')
         self.files = kargs.get('files')
         self.session_object = kargs.get('session')
         if not self.log:
@@ -97,7 +98,9 @@ class RequestObject:
                                      headers=self.hdrs,
                                      method=self.method)
         if self.auth:
-            req = self.add_basic_auth(req)
+            opener = self.add_http_auth(self.auth, 'basic', opener)
+        elif self.auth_digest:
+            opener = self.add_http_auth(self.auth_digest, 'digest', opener)
         try: 
             if opener:
                 r_open = opener.open(req, timeout=self.timeout)
@@ -110,20 +113,37 @@ class RequestObject:
         ret_obj = CreateReturnObject(self, r_open)
         return ret_obj
     
-    def add_basic_auth(self, req):
-        credentials = '{}:{}'.format(self.auth[0], self.auth[1])
+    def add_http_auth(self, auth_tuple, auth_type, opener=None):
+        logger.info(auth_type)
+        usr = auth_tuple[0]
+        passwd = auth_tuple[1]
+        if len(auth_tuple) == 2:
+            realm = None
+        elif len(auth_tuple) == 3:
+            realm = auth_tuple[2]
+        password_manager = urllib.request.HTTPPasswordMgrWithDefaultRealm()
+        password_manager.add_password(realm, self.url, usr, passwd)
+        if auth_type == 'basic':
+            auth_handler = urllib.request.HTTPBasicAuthHandler(password_manager)
+        else:
+            auth_handler = urllib.request.HTTPDigestAuthHandler(password_manager)
+        if opener:
+            logger.info('Adding Handle to Existing Opener')
+            opener.add_handler(auth_handler)
+        else:
+            opener = urllib.request.build_opener(auth_handler)
+        return opener
+        """
+        credentials = '{}:{}'.format(usr, passwd)
         encoded_credentials = base64.b64encode(bytes(credentials, 'utf-8'))
         req.add_header('Authorization', 'Basic {}'.format(encoded_credentials.decode('utf-8')))
         return req
+        """
     
     def add_proxy(self):
         logger.info('proxies {}'.format(self.proxies))
-        if self.url.startswith('http'):
-            http_handler = urllib.request.HTTPHandler()
-        else:
-            http_handler = urllib.request.HTTPSHandler()
         proxy_handler = urllib.request.ProxyHandler(self.proxies)
-        opener = urllib.request.build_opener(http_handler, proxy_handler)
+        opener = urllib.request.build_opener(proxy_handler)
         return opener
         
         
