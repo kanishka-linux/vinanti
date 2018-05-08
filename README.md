@@ -247,7 +247,7 @@ Async http request library for python with focus on simplicity
         
         7. vnt.start()
         
-        In above code 1-4 form one fetch session and lines 5-7 form another session.
+        In above code lines 2-4 form one fetch session and lines 5-7 form another session.
         
         Starting fetch session from vnt.add won't clear previous sessions list of urls.
         
