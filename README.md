@@ -115,7 +115,7 @@ Async http request library for python with focus on simplicity
         
         Here url should not be list. It should be proper string url.
         
-        Method als needs to be specified eg GET, POST or HEAD. 
+        Method also needs to be specified eg GET, POST or HEAD. 
         
         Default method is GET.
         
