@@ -188,40 +188,37 @@ Async http request library for python with focus on simplicity
         
 * **Troubleshooting:**
 
-    * Right ordering of http requests:
+    * Right way of making multiple http requests:
     
-        vnt = Vinanti(block=False, onfinished=hello)
+        1. vnt = Vinanti(block=False, onfinished=hello)
         
-        vnt.get(url)
+        2. vnt.get(url)
         
-        vnt.add(url1, method='GET')
+        3. vnt.add(url1, method='GET')
         
-        vnt.add(url2, method='POST', data={'hello':'world'})
+        4. vnt.add(url2, method='POST', data={'hello':'world'})
         
-        vnt.add(url1, method='GET')
+        5. vnt.add(url1, method='GET')
         
-        vnt.start()
+        6. vnt.start()
         
-    * Wrong ordering of http requests
+    * Wrong way of making multiple http requests
     
-        vnt = Vinanti(block=False, onfinished=hello)
+        1. vnt = Vinanti(block=False, onfinished=hello)
         
-        vnt.get(url1)
+        2. vnt.get(url1)
         
-        vnt.get(url2)
+        3. vnt.get(url2)
         
-        vnt.get(url3)
+        4. vnt.get(url3)
         
-        vnt.start()
+        5. vnt.start()
         
         In above ordering only last request (i.e. that of url3) will be fetched.
         
-        Users have to use vnt.add to add more http requests to the session,
+        Users have to use **vnt.add** to add more http requests to the session,
         
         otherwise only last http request will be fetched.
-        
-        
-            
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
