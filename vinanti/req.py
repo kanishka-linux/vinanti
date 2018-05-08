@@ -172,7 +172,11 @@ class CreateReturnObject:
                 shutil.copyfileobj(req, out_file)
             self.html = 'file saved to {}'.format(parent.out)
         else:
-            self.html = req.read().decode('utf-8')
+            try:
+                self.html = req.read().decode('utf-8')
+            except Exception as err:
+                logger.error(err)
+                self.html = str(err)
             
     def set_session_cookies(self):
         #o = urlparse(self.url)
