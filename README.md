@@ -112,7 +112,7 @@ Async http request library for python with focus on simplicity
         
 * Similar api is for PUT, DELETE, PATCH and OPTIONS
         
-* Note: In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET. First fetch command of any session (before vnt.start()) should never start with vnt.add(). First fetch command should be always vnt.get() or vnt.post() or vnt.head().
+* Note: In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET. First fetch command of any session (before vnt.start()) should never start with vnt.add(). First fetch command should be always get(), post() or other proper http requests.
 
 * START Fetching: 
         
