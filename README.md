@@ -2,6 +2,7 @@
 
 Async http request library for python with focus on simplicity
 
+-------
 ### Installation
 
         (Requires Python 3.5+, No other dependency)
@@ -17,7 +18,7 @@ Async http request library for python with focus on simplicity
 		
 		$ sudo pip3 uninstall vinanti (OR pip uninstall vinanti)
 		
-
+--------
 ### Let's Discuss some code:
 
         from vinanti import Vinanti
