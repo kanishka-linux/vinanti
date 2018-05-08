@@ -40,7 +40,10 @@ class Vinanti:
         else:
             self.backend = backend
         self.block = block
-        self.loop = asyncio.get_event_loop()
+        if self.block is None:
+            self.loop = None
+        else:
+            self.loop = asyncio.get_event_loop()
         self.tasks = OrderedDict()
         self.loop_nonblock_list = []
         self.log = log
@@ -73,12 +76,19 @@ class Vinanti:
         if self.session_params:
             global_params = [method, hdrs, onfinished, options_dict]
             method, onfinished, hdrs, options_dict = self.set_session_params(*global_params)
-        if not isinstance(urls, list):
-            urls = [urls]
-        for url in urls:
-            task_list = [url, onfinished, hdrs, method, options_dict]
-            length = len(self.tasks)
-            self.tasks.update({length:task_list})
+        if self.block is None:
+            req = None
+            print(urls)
+            if isinstance(urls, str):
+                req = self.__get_request__(urls, hdrs, method, options_dict)
+                return req
+        else:
+            if not isinstance(urls, list):
+                urls = [urls]
+            for url in urls:
+                task_list = [url, onfinished, hdrs, method, options_dict]
+                length = len(self.tasks)
+                self.tasks.update({length:task_list})
     
     def set_session_params(self, method, hdrs, onfinished, options_dict):
         if not method and self.method_global:
@@ -93,25 +103,25 @@ class Vinanti:
         return method, onfinished, hdrs, options_dict
     
     def get(self, urls, onfinished=None, hdrs=None, **kargs):
-        self.__build_tasks__(urls, 'GET', onfinished, hdrs, kargs)
+        return self.__build_tasks__(urls, 'GET', onfinished, hdrs, kargs)
     
     def post(self, urls, onfinished=None, hdrs=None, **kargs):
-        self.__build_tasks__(urls, 'POST', onfinished, hdrs, kargs)
+        return self.__build_tasks__(urls, 'POST', onfinished, hdrs, kargs)
         
     def head(self, urls, onfinished=None, hdrs=None, **kargs):
-        self.__build_tasks__(urls, 'HEAD', onfinished, hdrs, kargs)
+        return self.__build_tasks__(urls, 'HEAD', onfinished, hdrs, kargs)
     
     def put(self, urls, onfinished=None, hdrs=None, **kargs):
-        self.__build_tasks__(urls, 'PUT', onfinished, hdrs, kargs)
+        return self.__build_tasks__(urls, 'PUT', onfinished, hdrs, kargs)
         
     def delete(self, urls, onfinished=None, hdrs=None, **kargs):
-        self.__build_tasks__(urls, 'DELETE', onfinished, hdrs, kargs)
+        return self.__build_tasks__(urls, 'DELETE', onfinished, hdrs, kargs)
         
     def options(self, urls, onfinished=None, hdrs=None, **kargs):
-        self.__build_tasks__(urls, 'OPTIONS', onfinished, hdrs, kargs)
+        return self.__build_tasks__(urls, 'OPTIONS', onfinished, hdrs, kargs)
         
     def patch(self, urls, onfinished=None, hdrs=None, **kargs):
-        self.__build_tasks__(urls, 'PATCH', onfinished, hdrs, kargs)
+        return self.__build_tasks__(urls, 'PATCH', onfinished, hdrs, kargs)
     
     def function(self, urls, onfinished=None, **kargs):
         self.__build_tasks__(urls, 'FUNCTION', onfinished, None, kargs)
@@ -141,17 +151,17 @@ class Vinanti:
         
     def start(self):
         logger.info(self.tasks)
-        if self.block:
+        if self.block is True:
             if not self.loop.is_running():
                 self.__event_loop__(self.tasks)
             else:
                 logger.debug('loop running: {}'.format(self.loop.is_running()))
-        else:
+        elif self.block is False:
             new_loop = asyncio.new_event_loop()
             loop_thread = Thread(target=self.__start_non_block_loop__, args=(self.tasks, new_loop))
             self.loop_nonblock_list.append(loop_thread)
             self.loop_nonblock_list[len(self.loop_nonblock_list)-1].start()
-            
+                
     def __event_loop__(self, tasks_dict):
         tasks = []
         for i in tasks_dict:
