@@ -111,10 +111,16 @@ Async http request library for python with focus on simplicity
         
         vnt.add(url, onfinished=callback, method=method, hdr=header_dict)
         
+        Append url with given method to list of tasks. 
+        
+        Here url should not be list. It should be proper string url.
+        
+        Method als needs to be specified eg GET, POST or HEAD. 
+        
+        Default method is GET.
+        
 * Similar api is for PUT, DELETE, PATCH and OPTIONS
         
-* Note: In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET. First fetch command of any session (before vnt.start()) should never start with vnt.add(). First fetch command should be always get(), post() or other proper http requests.
-
 * START Fetching: 
         
         vnt.start()
@@ -189,21 +195,22 @@ Async http request library for python with focus on simplicity
         
 * **Troubleshooting:**
 
-        Right way of making multiple http requests:
+        Right way of making concurrent http requests:
     
         1. vnt = Vinanti(block=False, onfinished=hello)
         
-        2. vnt.get(url)
+        2. vnt.get(url1)
         
-        3. vnt.add(url1, method='GET')
+        3. vnt.add(url2, method='GET')
         
-        4. vnt.add(url2, method='POST', data={'hello':'world'})
+        4. vnt.add(url3, method='POST', data={'hello':'world'})
         
-        5. vnt.add(url1, method='GET')
+        5. vnt.add(url4, method='GET')
         
         6. vnt.start()
+        ------------------------------------------------------
         
-        Wrong way of making multiple http requests
+        Wrong way of making concurrent http requests:
     
         1. vnt = Vinanti(block=False, onfinished=hello)
         
@@ -211,17 +218,49 @@ Async http request library for python with focus on simplicity
         
         3. vnt.get(url2)
         
-        4. vnt.get(url3)
+        4. vnt.post(url3, data{'hello':'world'})
         
-        5. vnt.get(url4)
+        5. vnt.get(url5) # Only this url will be fetched in this session
         
         6. vnt.start()
         
-        In above wrong way, only last request (i.e. that of url4) will be fetched.
+        In above wrong way, only last request (i.e. that of url5) will be fetched.
         
         Users have to use **vnt.add** to add more http requests to the session,
         
         otherwise only last http request will be fetched.
+        -----------------------------------------------------
+        
+        Another wrong way of starting two concurrent fetch sessions:
+        
+        1. vnt = Vinanti(block=False, onfinished=hello, method='GET')
+        
+        2. vnt.get(url1)
+        
+        3. vnt.add(url2)
+        
+        4. vnt.start()
+        
+        5. vnt.add(url3)
+        
+        6. vnt.add(url4)
+        
+        7. vnt.start()
+        
+        In above code 1-4 form one fetch session and lines 5-7 form another session.
+        
+        Starting fetch session from add won't clear previous task list of urls.
+        
+        Therefore, instruction no. 5 will fetch urls from url1 to url3 and 
+        
+        instruction no.7 will fetch urls from url1 to url4 again.
+        
+        Therefore, every fetch session should start with either 
+        
+        vnt.get, vnt.post, vnt.head, vnt.put, vnt.delete, vnt.patch or vnt.options.
+        
+        Fetch session should never start with vnt.add
+        -----------------------------------------------------
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
