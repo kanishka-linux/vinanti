@@ -62,6 +62,9 @@ class Vinanti:
         self.tasks.clear()
         self.loop_nonblock_list.clear()
         self.session_params.clear()
+        self.method_global = 'GET'
+        self.hdrs_global = None
+        self.onfinished_global = None
     
     def __build_tasks__(self, urls, method, onfinished=None, hdrs=None, options_dict=None):
         self.tasks.clear()
