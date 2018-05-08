@@ -224,7 +224,7 @@ Async http request library for python with focus on simplicity
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
-#### Some more fun
+### Some more fun
 
 This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions, which will be executed in async manner. In order to pass functions instead of urls, developers have to use api in following manner
 
@@ -243,6 +243,26 @@ This library has been mainly made for asynchronous http requests, but the same d
         Note: vnt.function and vnt.function_add should not be mixed with http requests session.
         
         i.e. http request session should be separate from above function session
+        
+
+### Finally regular synchronous http requests
+
+Just initialize vinanti with block=None, and perform regular http requests. Sample code is given below. 
+
+        vnt = Vinanti(block=None, hdrs=hdr_dict)
+        
+        req = vnt.get(url)
+        
+        Now extract information from response object req as below:
+        
+        html = req.html
+        hdr_info = req.info
+        status_code = req.status
+        error = req.error
+        method = req.method
+        url = req.url
+        cookies = req.session_cookies
+        
 
 ### Sample application using Vinanti
 
