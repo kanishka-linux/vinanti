@@ -85,6 +85,12 @@ Async http request library for python with focus on simplicity
 * Initiliaze: 
         
         vnt = Vinanti(block=True/False)
+        
+        Note: Parameters passed during initialization will be shared with all following requests
+        
+        Eg. if header value is set during initialization then rest of the requests will
+        
+        share the same header, unless it is overridden by a particular request.
 
 * GET: 
         
@@ -104,6 +110,8 @@ Async http request library for python with focus on simplicity
         
         vnt.add(url, onfinished=callback, method=method, hdr=header_dict)
         
+* Similar api is for PUT, DELETE, PATCH and OPTIONS
+        
 * Note: In vnt.add, list of urls is not allowed, and method needs to be specified (GET, POST or HEAD). Default method is GET. First fetch command of any session (before vnt.start()) should never start with vnt.add(). First fetch command should be always vnt.get() or vnt.post() or vnt.head().
 
 * START Fetching: 
@@ -118,19 +126,11 @@ Async http request library for python with focus on simplicity
         
         * wait = In seconds #wait for seconds before making request
         
-        eg. wait = 1.0
-        
         * timeout = In seconds
-        
-        eg. timeout = 4.0
         
         * out = output-file #save output to this file
         
-        eg. out = '/tmp/sample.html'
-        
         * proxies = {type: proxy_server}
-        
-        eg. proxies = {'http': 'http://192.168.2.10:8000/'}
         
         * files = files to upload #use with POST
         
@@ -141,6 +141,49 @@ Async http request library for python with focus on simplicity
         * auth = ('user', 'passwd') #http basic auth
         
         * auth_digest = ('user', 'passwd') #http digest auth
+        
+        Examples:
+        
+        1. vnt = Vinanti(block=False, hdrs={'User-Agent':'Mozilla/5.0'}, onfinished=hello)
+        
+            # Initialize vinanti in non-blocking mode along with default user-agent string
+             
+             and same callback function hello for all requests.
+             
+        2. vnt.get('http://httpbin.org/get', params={'hello':'world'})
+        
+            # Send request 'http://httpbin.org/get?hello=world'
+            
+        3. vnt.post('http://httpbin.org/post', data={'world':'hello'}, files='/tmp/file1.txt')
+        
+            # It will make POST request along with data and files in the body.
+            
+        4. vnt.get('https://www.duckduckgo.com', out='/tmp/file.html')
+        
+            # Make request to duckduckgo and save response in /tmp/file.html
+            
+            # Same kind of request for saving any arbitrary binary file
+            
+        5. vnt.get('https://www.duckduckgo.com', wait=1.0)
+        
+            # Wait for 1 second before making this request
+            
+        5. vnt.get('https://www.duckduckgo.com', timeout=4.0)
+        
+            # set timeout for above request
+            
+        6. vnt.get('http://www.httpbin.org/ip', proxies={'http':'http://192.168.2.100:9000'})
+        
+            # Use proxy for making request
+            
+        7. vnt.get('https://httpbin.org/basic-auth/user/password', auth=('user','password'))
+        
+            # http basic authentication
+            
+        8. vnt.get('https://httpbin.org/digest-auth/auth/usr/passwd', auth_digest=('usr','passwd'))
+            
+            # http digest authentication
+            
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
