@@ -249,11 +249,11 @@ Async http request library for python with focus on simplicity
         
         In above code 1-4 form one fetch session and lines 5-7 form another session.
         
-        Starting fetch session from vnt.add won't clear previous task list of urls.
+        Starting fetch session from vnt.add won't clear previous sessions list of urls.
         
         Therefore, instruction no. 5 will fetch urls from url1 to url3 and 
         
-        instruction no.7 will fetch urls from url1 to url4 again.
+        instruction no.6 will fetch urls from url1 to url4 again.
         
         Therefore, every fetch session should start with either 
         
