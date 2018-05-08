@@ -188,7 +188,7 @@ Async http request library for python with focus on simplicity
         
 * **Troubleshooting:**
 
-    * Right way of making multiple http requests:
+        Right way of making multiple http requests:
     
         1. vnt = Vinanti(block=False, onfinished=hello)
         
@@ -202,7 +202,7 @@ Async http request library for python with focus on simplicity
         
         6. vnt.start()
         
-    * Wrong way of making multiple http requests
+        Wrong way of making multiple http requests
     
         1. vnt = Vinanti(block=False, onfinished=hello)
         
@@ -212,9 +212,11 @@ Async http request library for python with focus on simplicity
         
         4. vnt.get(url3)
         
-        5. vnt.start()
+        5. vnt.get(url4)
         
-        In above ordering only last request (i.e. that of url3) will be fetched.
+        6. vnt.start()
+        
+        In above wrong way, only last request (i.e. that of url4) will be fetched.
         
         Users have to use **vnt.add** to add more http requests to the session,
         
