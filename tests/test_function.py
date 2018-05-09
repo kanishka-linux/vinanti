@@ -26,21 +26,21 @@ class TestVinanti(unittest.TestCase):
     
     def test_function_block(self):
         vnt = Vinanti(block=False)
-        vnt.function(hello_world, onfinished=partial(hello, 'noblock_function'), url='http://www.yahoo.com')
-        vnt.function_add(hello_world, onfinished=partial(konichiwa, 'noblock_function'), url='http://www.google.com')
-        vnt.function_add(hello_world, onfinished=partial(namaste, 'noblock_function'), url='http://www.wikipedia.org')
+        vnt.function(hello_world, 'http://www.yahoo.com', onfinished=partial(hello, 'noblock_function'))
+        vnt.function_add(hello_world, 'http://www.google.com', onfinished=partial(konichiwa, 'noblock_function'))
+        vnt.function_add(hello_world, 'http://www.wikipedia.org', onfinished=partial(namaste, 'noblock_function'))
         vnt.start()
         vnt = Vinanti(block=True)
-        vnt.function(hello_world, onfinished=partial(hello, 'block_function'), url='http://www.yahoo.com')
-        vnt.function_add(hello_world, onfinished=partial(konichiwa, 'block_function'), url='http://www.google.com')
-        vnt.function_add(hello_world, onfinished=partial(namaste, 'block_function'), url='http://www.wikipedia.org')
+        vnt.function(hello_world, 'http://www.yahoo.com', onfinished=partial(hello, 'block_function'))
+        vnt.function_add(hello_world, 'http://www.google.com', onfinished=partial(konichiwa, 'block_function'))
+        vnt.function_add(hello_world, 'http://www.wikipedia.org', onfinished=partial(namaste, 'block_function'))
         vnt.start()
-        
+    
     def test_function_non_block(self):
         vnt = Vinanti(block=False)
-        vnt.function(hello_world, onfinished=partial(hello, 'noblock'), url='http://www.yahoo.com')
-        vnt.function_add(hello_world, onfinished=partial(konichiwa, 'noblock'), url='http://www.google.com')
-        vnt.function_add(hello_world, onfinished=partial(namaste, 'noblock'), url='http://www.wikipedia.org')
+        vnt.function(hello_world, 'http://www.yahoo.com', onfinished=partial(hello, 'noblock_function'))
+        vnt.function_add(hello_world, 'http://www.google.com', onfinished=partial(konichiwa, 'noblock'))
+        vnt.function_add(hello_world, 'http://www.wikipedia.org', onfinished=partial(namaste, 'noblock'))
         vnt.start()
     
 if __name__ == '__main__':
