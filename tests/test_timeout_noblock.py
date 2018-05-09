@@ -53,42 +53,35 @@ class TestVinanti(unittest.TestCase):
     def test_get(self):
         vnt = Vinanti(block=False)
         vnt.get(self.urls, onfinished=hello, hdrs=self.hdr, timeout=0.1)
-        vnt.start()
         
     def test_head(self):
         vnt = Vinanti(block=False)
         vnt.head(self.urls, onfinished=hello, hdrs=self.hdr, timeout=0.5)
-        vnt.start()
         
     def test_post(self):
         urls = ['http://httpbin.org/post', 'http://httpbin.org/post']
         vnt = Vinanti(block=False)
         vnt.post(urls, onfinished=hello, hdrs=self.hdr, data=(('moe', 'curly'), ('moe', 'larry')), timeout=1)
-        vnt.start()
         
     def test_post_more(self):
         urls = ['http://httpbin.org/post', 'http://httpbin.org/post']
         vnt = Vinanti(block=False)
         vnt.post(urls, onfinished=hello, hdrs=self.hdr, data={'yotsubato':'aria','mushishi':'kino'}, timeout=0.5)
-        vnt.start()
         
     def test_get_params(self):
         urls = ['http://httpbin.org/get', 'http://httpbin.org/get']
         vnt = Vinanti(block=False)
         vnt.get(urls, onfinished=hello, hdrs=self.hdr, params={'billoo':'diamond comics', 'dhruva':'raj comics'}, timeout=0.5)
-        vnt.start()
         
     def test_without_hdrs(self):
         urls = ['https://news.ycombinator.com/news', 'https://github.com/']
         vnt = Vinanti(block=False)
         vnt.get(urls, onfinished=partial(hello, 'test_without_hdrs'), timeout=1.0)
-        vnt.start()
         
     def test_without_callback(self):
         urls = ['https://news.ycombinator.com/news', 'https://github.com/']
         vnt = Vinanti(block=False)
         vnt.get(urls, timeout=1.0)
-        vnt.start()
         
 if __name__ == '__main__':
     BASEDIR, BASEFILE = os.path.split(os.path.abspath(__file__))

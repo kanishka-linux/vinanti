@@ -17,13 +17,13 @@ proxies = {'http': 'http://192.168.2.10:9000/'}
 class TestVinanti(unittest.TestCase):
     
     def test_proxy_block(self):
-        vnt = Vinanti(block=True, log=logval)
+        vnt = Vinanti(block=True, log=logval, group_task=True)
         vnt.get('http://www.httpbin.org/ip',onfinished=hello, hdrs=hdr, proxies=proxies)
         vnt.add('http://www.httpbin.org/post', method='POST', data={'moe':'curly'}, onfinished=hello, hdrs=hdr, proxies=proxies)
         vnt.start()
 
     def test_proxy_noblock(self):
-        vnt = Vinanti(block=False, log=logval)
+        vnt = Vinanti(block=False, log=logval, group_task=True)
         vnt.get('http://www.httpbin.org/ip',onfinished=hello, hdrs=hdr, proxies=proxies)
         vnt.add('http://www.httpbin.org/post', method='POST', data={'moe':'curly'}, onfinished=hello, hdrs=hdr, proxies=proxies)
         vnt.start()

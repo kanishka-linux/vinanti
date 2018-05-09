@@ -32,7 +32,7 @@ class TestVinanti(unittest.TestCase):
     block = False
     
     def test_session(self):
-        vnt = Vinanti(block=self.block, method='GET', onfinished=hello, hdrs=self.hdr)
+        vnt = Vinanti(block=self.block, method='GET', onfinished=hello, hdrs=self.hdr, group_task=True)
         vnt.get('http://www.google.com', out='/tmp/1.html')
         vnt.add('http://www.wikipedia.org', out='/tmp/2.html')
         vnt.add('http://www.google.com', out='/tmp/3.html')
@@ -40,7 +40,7 @@ class TestVinanti(unittest.TestCase):
 
     def test_session_mix(self):
         data_dict = {'hello':'world', 'world':'hello'}
-        vnt = Vinanti(block=self.block, onfinished=hello, hdrs=self.hdr, method='POST', data=data_dict)
+        vnt = Vinanti(block=self.block, onfinished=hello, hdrs=self.hdr, method='POST', data=data_dict, group_task=True)
         vnt.post('http://www.httpbin.org/post')
         vnt.add('http://www.httpbin.org/post', data={'clrs':'algo'})
         vnt.add('http://www.httpbin.org/post', data={'ast':'OS'})

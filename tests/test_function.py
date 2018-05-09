@@ -25,19 +25,19 @@ def hello_world(url):
 class TestVinanti(unittest.TestCase):
     
     def test_function_block(self):
-        vnt = Vinanti(block=False)
+        vnt = Vinanti(block=False, group_task=True)
         vnt.function(hello_world, 'http://www.yahoo.com', onfinished=partial(hello, 'noblock_function'))
         vnt.function_add(hello_world, 'http://www.google.com', onfinished=partial(konichiwa, 'noblock_function'))
         vnt.function_add(hello_world, 'http://www.wikipedia.org', onfinished=partial(namaste, 'noblock_function'))
         vnt.start()
-        vnt = Vinanti(block=True)
+        vnt = Vinanti(block=True, group_task=True)
         vnt.function(hello_world, 'http://www.yahoo.com', onfinished=partial(hello, 'block_function'))
         vnt.function_add(hello_world, 'http://www.google.com', onfinished=partial(konichiwa, 'block_function'))
         vnt.function_add(hello_world, 'http://www.wikipedia.org', onfinished=partial(namaste, 'block_function'))
         vnt.start()
     
     def test_function_non_block(self):
-        vnt = Vinanti(block=False)
+        vnt = Vinanti(block=False, group_task=True)
         vnt.function(hello_world, 'http://www.yahoo.com', onfinished=partial(hello, 'noblock_function'))
         vnt.function_add(hello_world, 'http://www.google.com', onfinished=partial(konichiwa, 'noblock'))
         vnt.function_add(hello_world, 'http://www.wikipedia.org', onfinished=partial(namaste, 'noblock'))

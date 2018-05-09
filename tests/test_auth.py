@@ -19,7 +19,7 @@ url2 = 'https://httpbin.org/digest-auth/auth/user-digest/password-digest'
 class TestVinanti(unittest.TestCase):
 
     def test_auth_noblock(self):
-        vnt = Vinanti(block=False, log=logval)
+        vnt = Vinanti(block=False, log=logval, group_task=True)
         vnt.get(url1, onfinished=hello, hdrs=hdr, auth=('user-basic','password-basic'))
         vnt.add(url2, onfinished=hello, hdrs=hdr, auth_digest=('user-digest','password-digest'))
         vnt.start()

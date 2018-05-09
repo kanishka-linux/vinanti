@@ -20,14 +20,14 @@ logval = False
 class TestVinanti(unittest.TestCase):
     
     def test_add_block(self):
-        vnt = Vinanti(block=True, log=logval)
+        vnt = Vinanti(block=True, log=logval, group_task=True)
         vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr, wait=0.5)
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr, wait=2)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr, wait=0.5)
         vnt.start()
         
     def test_add_noblock(self):
-        vnt = Vinanti(block=False, log=logval)
+        vnt = Vinanti(block=False, log=logval, group_task=True)
         vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr, wait=4.0)
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr, wait=0.1)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr, wait=1.0)

@@ -16,7 +16,7 @@ logval = False
 class TestVinanti(unittest.TestCase):
     
     def test_post_file_block(self):
-        vnt = Vinanti(block=True, log=logval)
+        vnt = Vinanti(block=True, log=logval, group_task=True)
         file1 = 'enter-complete-path-of-file1'
         file2 = 'enter-complete-path-of-file2'
         file_single = file1
@@ -30,7 +30,7 @@ class TestVinanti(unittest.TestCase):
         vnt.start()
     
     def test_post_file_noblock(self):
-        vnt = Vinanti(block=False, log=logval)
+        vnt = Vinanti(block=False, log=logval, group_task=True)
         file1 = 'enter-complete-path-of-file1'
         file2 = 'enter-complete-path-of-file2'
         file_single = file1

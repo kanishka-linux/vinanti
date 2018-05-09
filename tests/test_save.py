@@ -30,9 +30,8 @@ class TestVinanti(unittest.TestCase):
     def test_save_file(self):
         vnt = Vinanti(block=False)
         vnt.get('http://www.google.com',onfinished=hello, hdrs=self.hdr, out='/tmp/1.html')
-        vnt.add('http://www.wikipedia.org',onfinished=hello, hdrs=self.hdr, out='/tmp/2.html')
-        vnt.add('http://www.google.com',onfinished=hello, hdrs=self.hdr, out='/tmp/3.html')
-        vnt.start()
+        vnt.get('http://www.wikipedia.org',onfinished=hello, hdrs=self.hdr, out='/tmp/2.html')
+        vnt.get('http://www.google.com',onfinished=hello, hdrs=self.hdr, out='/tmp/3.html')
 
         
 if __name__ == '__main__':

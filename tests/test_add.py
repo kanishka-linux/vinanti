@@ -27,7 +27,7 @@ def bonjour(*args):
 class TestVinanti(unittest.TestCase):
     
     def test_add_block(self):
-        vnt = Vinanti(block=True)
+        vnt = Vinanti(block=True, group_task=True)
         vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
@@ -37,7 +37,7 @@ class TestVinanti(unittest.TestCase):
         vnt.start()
         
     def test_add_noblock(self):
-        vnt = Vinanti(block=False)
+        vnt = Vinanti(block=False, group_task=True)
         vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
         vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
         vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
