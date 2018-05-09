@@ -123,11 +123,11 @@ class Vinanti:
     def patch(self, urls, onfinished=None, hdrs=None, **kargs):
         return self.__build_tasks__(urls, 'PATCH', onfinished, hdrs, kargs)
     
-    def function(self, urls, onfinished=None, **kargs):
-        self.__build_tasks__(urls, 'FUNCTION', onfinished, None, kargs)
+    def function(self, urls, *args, onfinished=None):
+        self.__build_tasks__(urls, 'FUNCTION', onfinished, None, args)
         
-    def function_add(self, urls, onfinished=None, **kargs):
-        task_list = [urls, onfinished, None, 'FUNCTION', kargs]
+    def function_add(self, urls, *args, onfinished=None):
+        task_list = [urls, onfinished, None, 'FUNCTION', args]
         length = len(self.tasks)
         self.tasks.update({length:task_list})
     
@@ -188,5 +188,5 @@ class Vinanti:
         response = await future
         
     def __complete_request__(self, url, args, method, kargs):
-        req_obj = url(**kargs)
+        req_obj = url(*kargs)
         return req_obj
