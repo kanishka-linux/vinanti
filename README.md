@@ -5,14 +5,21 @@ Async http request library for python with focus on simplicity
 
 ### Installation
 
-        (Requires Python 3.5+, No other dependency)
-
+        Requires Python 3.5+, No other dependency
+        
+        ----------------------------------------------------
 		$ git clone https://github.com/kanishka-linux/vinanti
 		$ cd vinanti
 		$ python3 setup.py sdist (or python setup.py sdist)
 		$ cd dist
-		$ sudo pip3 install pkg_available_in_directory (or pip install pkg_available_in_directory) 
+		$ (sudo) pip3 install pkg_available_in_directory (or pip install pkg_available_in_directory) 
         {where 'pkg_available_in_directory' is the exact name of the package created in the 'dist' folder}
+        ----------------------------------------------------
+        OR
+        ----------------------------------------------------
+        $ (sudo) pip install git+https://github.com/kanishka-linux/vinanti.git
+        ----------------------------------------------------
+        use 'sudo' depending on whether you want to install package system-wide or not
 			
 ### Uninstall
 		
