@@ -41,6 +41,9 @@ Async http request library for python with focus on simplicity
 
         from vinanti import Vinanti
         
+        def hello(*args):
+            print(args)
+        
         hdr = {"User-Agent":"Mozilla/5.0"}
         urls = [
             'http://www.yahoo.com',
