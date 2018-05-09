@@ -34,7 +34,7 @@ Async http request library for python with focus on simplicity
 			
 ### Uninstall
 		
-		$ sudo pip3 uninstall vinanti (OR pip uninstall vinanti)
+		$ sudo pip uninstall vinanti (OR pip3 uninstall vinanti)
 		
 
 ### Let's Discuss some code:
