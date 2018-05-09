@@ -209,7 +209,7 @@ Async http request library for python with focus on simplicity
 
 This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions, which will be executed in async manner. In order to pass functions instead of urls, developers have to use api in following manner
 
-        vnt = Vinanti(block=False/True) # Other parameters can be passed during initialization
+        vnt = Vinanti(block=False/True, group_task=True) # Other parameters can be passed during initialization
                     
                                          but they won't be of any use in this case
         
