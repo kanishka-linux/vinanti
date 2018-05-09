@@ -61,7 +61,7 @@ Async http request library for python with focus on simplicity
         
 * In above sample code, once vnt.get() gets executed, the main thread will be blocked, but list of urls will be fetched asynchronously. After fetching every url, the **hello** callback function will be called. Once all urls are fetched, it will print 'Completed'.
     
-* Now just replace **Vinanti(block=True)** with **Vinanti(block=False)**, in above code and run. It will execute entire code and won't block after vnt.start(). In above code, users will find that it will print 'Completed' immediately, and fetching of urls will keep on going in the background asynchronously.
+* Now just replace **Vinanti(block=True)** with **Vinanti(block=False)**, in above code and re-run. It will execute entire code and won't block after vnt.get(). In above code, users will find that it will print 'Completed' immediately, and fetching of urls will keep on going in the background asynchronously.
     
 * About Callback **hello** function: This function will be called after fetching of every url has been completed. If no parameters are passed to hello function using partial, then callback will return with three parameters. Signature of default hello function looks like below:
         
