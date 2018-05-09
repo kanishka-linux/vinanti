@@ -34,7 +34,7 @@ logger = log_function(__name__)
 
 class Vinanti:
     
-    def __init__(self, backend=None, block=True, log=False, **kargs):
+    def __init__(self, backend=None, block=True, log=False, group_task=False, **kargs):
         if backend is None:
             self.backend = 'urllib'
         else:
@@ -47,6 +47,7 @@ class Vinanti:
         self.tasks = OrderedDict()
         self.loop_nonblock_list = []
         self.log = log
+        self.group_task = group_task
         if not self.log:
             logger.disabled = True
         self.global_param_list = ['method', 'hdrs', 'onfinished']
@@ -83,12 +84,16 @@ class Vinanti:
                 req = self.__get_request__(urls, hdrs, method, options_dict)
                 return req
         else:
+            task_dict = {}
             if not isinstance(urls, list):
                 urls = [urls]
-            for url in urls:
+            for i, url in enumerate(urls):
                 task_list = [url, onfinished, hdrs, method, options_dict]
+                task_dict.update({i:task_list})
                 length = len(self.tasks)
                 self.tasks.update({length:task_list})
+            if task_dict and not self.group_task:
+                self.start(task_dict)
     
     def set_session_params(self, method, hdrs, onfinished, options_dict):
         if not method and self.method_global:
@@ -149,16 +154,18 @@ class Vinanti:
         loop.run_until_complete(asyncio.gather(*tasks))
         loop.close()
         
-    def start(self):
-        logger.info(self.tasks)
-        if self.block is True:
+    def start(self, task_dict=None):
+        logger.info(task_dict)
+        if self.group_task:
+            task_dict = self.tasks
+        if self.block is True and task_dict:
             if not self.loop.is_running():
-                self.__event_loop__(self.tasks)
+                self.__event_loop__(task_dict)
             else:
                 logger.debug('loop running: {}'.format(self.loop.is_running()))
-        elif self.block is False:
+        elif self.block is False and task_dict:
             new_loop = asyncio.new_event_loop()
-            loop_thread = Thread(target=self.__start_non_block_loop__, args=(self.tasks, new_loop))
+            loop_thread = Thread(target=self.__start_non_block_loop__, args=(task_dict, new_loop))
             self.loop_nonblock_list.append(loop_thread)
             self.loop_nonblock_list[len(self.loop_nonblock_list)-1].start()
                 
