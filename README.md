@@ -211,7 +211,7 @@ This library has been mainly made for asynchronous http requests, but the same d
 
         vnt = Vinanti(block=False/True, group_task=True) # Other parameters can be passed during initialization
                     
-                                         but they won't be of any use in this case
+                                                        but they won't be of any use in this case
         
         vnt.function(hello_world, rest parameters to hello_world, onfinished=hello)
         
