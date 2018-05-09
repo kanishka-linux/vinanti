@@ -290,9 +290,9 @@ This library has been mainly made for asynchronous http requests, but the same d
                     
                                          but they won't be of any use in this case
         
-        vnt.function(hello_world, onfinished=hello, rest parameters to hello_world)
+        vnt.function(hello_world, rest parameters to hello_world, onfinished=hello)
         
-        vnt.function_add(hello_world, onfinished=hello, rest parameters to hello_world)
+        vnt.function_add(hello_world, rest parameters to hello_world, onfinished=hello)
         
         vnt.start()
         
