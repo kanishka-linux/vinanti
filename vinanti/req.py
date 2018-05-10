@@ -58,8 +58,6 @@ class RequestObject:
     
     def __init_extra__(self):
         self.data_old = None
-        if self.wait:
-            logger.debug('Waiting for {} seconds: {}'.format(self.wait, self.url))
         if not self.hdrs:
             self.hdrs = {"User-Agent":"Mozilla/5.0"}
         if not self.method:
@@ -89,8 +87,6 @@ class RequestObject:
         
     def process_request(self):
         opener = None
-        if self.wait:
-            time.sleep(self.wait)
         if self.proxies:
             opener = self.add_proxy()
         req = urllib.request.Request(self.url, data=self.data,
