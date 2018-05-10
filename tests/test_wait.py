@@ -15,24 +15,29 @@ def namaste(*args):
 def konichiwa(*args):
     print('konichiwa: {}'.format(args[-2]))
 
-logval = False
+logval = True
 
 class TestVinanti(unittest.TestCase):
     
     def test_add_block(self):
-        vnt = Vinanti(block=True, log=logval, group_task=True)
-        vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr, wait=0.5)
-        vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr, wait=2)
-        vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr, wait=0.5)
-        vnt.start()
+        vnt = Vinanti(block=True, log=logval, hdrs=hdr)
+        vnt.get('http://www.google.com',onfinished=hello)
+        vnt.get('http://www.wikipedia.org',onfinished=namaste)
+        vnt.get('http://www.duckduckgo.com',onfinished=konichiwa)
+        vnt.get('http://www.google.com',onfinished=hello, wait=3.0)
+        vnt.get('http://www.wikipedia.org',onfinished=namaste)
+        vnt.get('http://www.duckduckgo.com',onfinished=konichiwa)
+        #vnt.start()
         
-    def test_add_noblock(self):
-        vnt = Vinanti(block=False, log=logval, group_task=True)
-        vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr, wait=4.0)
-        vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr, wait=0.1)
-        vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr, wait=1.0)
-        vnt.start()
-
+    def test_add_block(self):
+        vnt = Vinanti(block=False, log=logval, hdrs=hdr)
+        vnt.get('http://www.google.com',onfinished=hello)
+        vnt.get('http://www.wikipedia.org',onfinished=namaste)
+        vnt.get('http://www.duckduckgo.com',onfinished=konichiwa)
+        vnt.get('http://www.google.com',onfinished=hello, wait=3.0)
+        vnt.get('http://www.wikipedia.org',onfinished=namaste, wait=1.0)
+        vnt.get('http://www.duckduckgo.com',onfinished=konichiwa)
+    
         
 if __name__ == '__main__':
     BASEDIR, BASEFILE = os.path.split(os.path.abspath(__file__))
