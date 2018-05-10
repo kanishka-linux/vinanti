@@ -17,8 +17,10 @@ You should have received a copy of the GNU Lesser General Public License
 along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 """
 
+import time
 import asyncio
 import urllib.parse
+from urllib.parse import urlparse
 import urllib.request
 from functools import partial
 from threading import Thread
@@ -62,6 +64,7 @@ class Vinanti:
             self.hdrs_global = None
             self.onfinished_global = None
         self.tasks_completed = {}
+        self.tasks_timing = {}
         
     def clear(self):
         self.tasks.clear()
@@ -204,6 +207,17 @@ class Vinanti:
         self.loop.run_until_complete(asyncio.gather(*tasks))
         
     def __get_request__(self, url, hdrs, method, kargs):
+        n = urlparse(url)
+        netloc = n.netloc
+        old_time = self.tasks_timing.get(netloc)
+        wait_time = kargs.get('wait')
+        if old_time and wait_time:
+            time_diff = time.time() - old_time
+            while(time_diff < wait_time):
+                logger.info('waiting in queue..{}'.format(netloc))
+                time.sleep(0.1)
+                time_diff = time.time() - self.tasks_timing.get(netloc)
+        self.tasks_timing.update({netloc:time.time()})
         req_obj = None
         kargs.update({'log':self.log})
         if self.backend == 'urllib':
