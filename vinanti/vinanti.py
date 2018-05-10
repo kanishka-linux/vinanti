@@ -61,6 +61,7 @@ class Vinanti:
             self.method_global = 'GET'
             self.hdrs_global = None
             self.onfinished_global = None
+        self.tasks_completed = {}
         
     def clear(self):
         self.tasks.clear()
@@ -88,10 +89,12 @@ class Vinanti:
             if not isinstance(urls, list):
                 urls = [urls]
             for i, url in enumerate(urls):
-                task_list = [url, onfinished, hdrs, method, options_dict]
-                task_dict.update({i:task_list})
                 length = len(self.tasks)
+                length_new = len(self.tasks_completed)
+                task_list = [url, onfinished, hdrs, method, options_dict, length_new]
+                task_dict.update({i:task_list})
                 self.tasks.update({length:task_list})
+                self.tasks_completed.update({length_new:False})
             if task_dict and not self.group_task:
                 self.start(task_dict)
     
@@ -132,25 +135,29 @@ class Vinanti:
         self.__build_tasks__(urls, 'FUNCTION', onfinished, None, args)
         
     def function_add(self, urls, *args, onfinished=None):
-        task_list = [urls, onfinished, None, 'FUNCTION', args]
+        length_new = len(self.tasks_completed)
+        task_list = [urls, onfinished, None, 'FUNCTION', args, length_new]
         length = len(self.tasks)
         self.tasks.update({length:task_list})
+        self.tasks_completed.update({length_new:False})
     
     def add(self, urls, onfinished=None, hdrs=None, method=None, **kargs):
         if self.session_params:
             global_params = [method, hdrs, onfinished, kargs]
             method, onfinished, hdrs, kargs = self.set_session_params(*global_params)
         if isinstance(urls, str):
-            task_list = [urls, onfinished, hdrs, method, kargs]
             length = len(self.tasks)
+            length_new = len(self.tasks_completed)
+            task_list = [urls, onfinished, hdrs, method, kargs, length_new]
             self.tasks.update({length:task_list})
-    
+            self.tasks_completed.update({length_new:False})
+            
     def __start_non_block_loop__(self, tasks_dict, loop):
         asyncio.set_event_loop(loop)
         tasks = []
-        for i in tasks_dict:
-            url, onfinished, hdrs, method, kargs = tasks_dict[i]
-            tasks.append(asyncio.ensure_future(self.__start_fetching__(url, onfinished, hdrs, i, loop, method, kargs))) 
+        for key, val in tasks_dict.items():
+            url, onfinished, hdrs, method, kargs, length = val
+            tasks.append(asyncio.ensure_future(self.__start_fetching__(url, onfinished, hdrs, length, loop, method, kargs))) 
         loop.run_until_complete(asyncio.gather(*tasks))
         loop.close()
         
@@ -171,9 +178,9 @@ class Vinanti:
                 
     def __event_loop__(self, tasks_dict):
         tasks = []
-        for i in tasks_dict:
-            url, onfinished, hdrs, method, kargs = tasks_dict[i]
-            tasks.append(asyncio.ensure_future(self.__start_fetching__(url, onfinished, hdrs, i, self.loop, method, kargs))) 
+        for key, val in tasks_dict.items():
+            url, onfinished, hdrs, method, kargs, length = val
+            tasks.append(asyncio.ensure_future(self.__start_fetching__(url, onfinished, hdrs, length, self.loop, method, kargs))) 
         self.loop.run_until_complete(asyncio.gather(*tasks))
         
     def __get_request__(self, url, hdrs, method, kargs):
@@ -193,6 +200,7 @@ class Vinanti:
         if onfinished:
             future.add_done_callback(partial(onfinished, task_num, url))
         response = await future
+        self.tasks_completed.update({task_num:True})
         
     def __complete_request__(self, url, args, method, kargs):
         req_obj = url(*kargs)
