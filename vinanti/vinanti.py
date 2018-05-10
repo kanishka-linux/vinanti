@@ -214,8 +214,8 @@ class Vinanti:
         if old_time and wait_time:
             time_diff = time.time() - old_time
             while(time_diff < wait_time):
-                logger.info('waiting in queue..{}'.format(netloc))
-                time.sleep(0.1)
+                logger.info('waiting in queue..{} for {}s'.format(netloc, wait_time))
+                time.sleep(wait_time)
                 time_diff = time.time() - self.tasks_timing.get(netloc)
         self.tasks_timing.update({netloc:time.time()})
         req_obj = None
