@@ -65,11 +65,31 @@ class Vinanti:
         
     def clear(self):
         self.tasks.clear()
+        self.tasks_completed.clear()
         self.loop_nonblock_list.clear()
         self.session_params.clear()
         self.method_global = 'GET'
         self.hdrs_global = None
         self.onfinished_global = None
+    
+    def tasks_count(self):
+        return len(self.tasks_completed)
+    
+    def tasks_done(self):
+        tasks_copy = self.tasks_completed.copy()
+        count = 0
+        for key, val in tasks_copy.items():
+            if val:
+                count += 1
+        return count
+        
+    def tasks_remaining(self):
+        tasks_copy = self.tasks_completed.copy()
+        count = 0
+        for key, val in tasks_copy.items():
+            if not val:
+                count += 1
+        return count
     
     def __build_tasks__(self, urls, method, onfinished=None, hdrs=None, options_dict=None):
         self.tasks.clear()
