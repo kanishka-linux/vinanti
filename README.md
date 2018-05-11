@@ -34,7 +34,7 @@ Async http request library for python with focus on simplicity
 			
 ### Uninstall
 		
-		$ sudo pip uninstall vinanti (OR pip3 uninstall vinanti)
+		$ (sudo) pip uninstall vinanti (OR pip3 uninstall vinanti)
 		
 
 ### Let's Discuss some code:
@@ -133,10 +133,6 @@ Async http request library for python with focus on simplicity
         Default method is GET.
         
 * Similar api is for PUT, DELETE, PATCH and OPTIONS
-        
-* START Fetching when group_task is set to True: 
-        
-        vnt.start()
 
 * Some other parameters which can be passed to get, post, head and add functions:
 
