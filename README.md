@@ -164,7 +164,7 @@ Async http request library for python with focus on simplicity
         
             # Initialize vinanti in non-blocking mode along with default user-agent string
              
-             and same callback function hello for all requests.
+             and same callback function hello for all following requests.
              
         2. vnt.get('http://httpbin.org/get', params={'hello':'world'})
         
