@@ -134,13 +134,14 @@ Async http request library for python with focus on simplicity
         
 * Similar api is for PUT, DELETE, PATCH and OPTIONS
 
-* Some other parameters which can be passed to get, post, head and add functions:
+* Some other parameters which can be passed to get, post, head and other http request functions:
 
         * params = {key: value} #use with GET
         
         * data = {key: value} or ((key, value1), (key, value2)) #use with POST
         
-        * wait = In seconds #wait for seconds before making request
+        * wait = In seconds #wait for seconds before making request. This
+                            # parameter works domain wise.
         
         * timeout = In seconds
         
@@ -202,15 +203,31 @@ Async http request library for python with focus on simplicity
             
         9. vnt.start() # Start fetching when group_task=True
         
+* Accessing few more properties on running tasks:
+        
+        1. vnt.tasks_count() # Total tasks count in a session
+        
+        2. vnt.tasks_done() # Total tasks done
+        
+        3. vnt.tasks_remaining() # Total tasks remaining
+        
+        Note: Above properties are approximate.
+        
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
 ### Some more fun
 
 This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions, which will be executed in async manner. In order to pass functions instead of urls, developers have to use api in following manner
-
+        
+        def hello_world(*args):
+            print("hello world")
+            
+        def hello(*args):
+            print("hello")
+        
         vnt = Vinanti(block=False/True, group_task=True) # Other parameters can be passed during initialization
                     
-                                                        but they won't be of any use in this case
+                                                        but they won't be of any use in the case of functions.
         
         vnt.function(hello_world, rest parameters to hello_world, onfinished=hello)
         
