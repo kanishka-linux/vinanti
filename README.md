@@ -268,7 +268,7 @@ A sample application using Vinati is available [here](https://github.com/kanishk
 
 ### Sample library using Vinanti
 
-A sample [tvdb-async](https://github.com/kanishka-linux/tvdb-async) library is also available. This library allows fetching of metadata about series in async manner as it is made available.
+A sample [tvdb-async](https://github.com/kanishka-linux/tvdb-async) library is also available. This library allows fetching of tv series metadata from thetvdb.com in async manner as it is made available.
     
 ### Motivation for writing the library
 
