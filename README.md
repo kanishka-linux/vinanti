@@ -85,6 +85,7 @@ Async http request library for python with focus on simplicity
             error = result.error #Error information if fetching failed
             url = result.url #Final url location which is fetched
             status_code = result.status #Status code
+            
             cookies = result.session_cookies #If available
             
             header_info = result.info # Dictionary of header information
@@ -135,7 +136,11 @@ Async http request library for python with focus on simplicity
 * Similar api is for PUT, DELETE, PATCH and OPTIONS
 
 * Some other parameters which can be passed to get, post, head and other http request functions:
-
+        
+        * session = True/False # Maintain session cookies between requests.
+                               # This option will automatically handle setting
+                               # and sending of session cookies.
+        
         * params = {key: value} #use with GET
         
         * data = {key: value} or ((key, value1), (key, value2)) #use with POST
@@ -216,6 +221,20 @@ Async http request library for python with focus on simplicity
         3. vnt.tasks_remaining() # Total tasks remaining
         
         Note: Above properties are approximate.
+        
+* Clearing Session:
+
+        1. vnt.session_clear() # clear all session cookies 
+        
+        2. vnt.session_clear(netloc) # clear session cookie from specific domain
+        
+        Eg. if url is 'https://en.wikipedia.org/wiki/Main_Page' then netloc is
+        
+        'en.wikipedia.org'. 
+        
+        vnt.session.clear('en.wikipedia.org'), will clear session cookies related
+        
+        to wikipedia. 
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
