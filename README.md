@@ -159,6 +159,10 @@ Async http request library for python with focus on simplicity
         
         * auth_digest = ('user', 'passwd') #http digest auth
         
+        * binary = True/False # Get html response body in bytes.
+        
+        * charset = specify character set encoding 
+        
         Examples:
         
         1. vnt = Vinanti(block=False, hdrs={'User-Agent':'Mozilla/5.0'}, onfinished=hello)
