@@ -266,7 +266,7 @@ Just initialize vinanti with block=None, and perform regular http requests. Samp
 
 A sample application using Vinati is available [here](https://github.com/kanishka-linux/WebComics). It is PyQt application. In qt based applications, fetching urls on one hand and keeping GUI responsive on the other hand is bit cumbersome. In order to keep qt gui responsive, one needs to spin thread (for fetching urls) and then GUI needs to be updated using signal/slot mechanism. The application tries do similar thing using Vinanti, but without external threads and signal/slot mechanism. It intializes Vinanti with **block=False**, and tries to achieve same thing using callback mechanism.
 
-Note: This approach may work for updating few qt widgets, but not for all. For complicated applications, it is better to use custom signal/slot mechanism along with vinanti.
+Note: This approach may work for simple pyqt applications. For complicated applications, it is better to use custom signal/slot mechanism along with vinanti.
 
 ### Sample library using Vinanti
 
