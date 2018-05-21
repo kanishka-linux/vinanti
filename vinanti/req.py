@@ -225,7 +225,7 @@ class CreateReturnObject:
             elif parent.binary:
                 self.html = req.read()
             else:
-                self.html = 'not text file: content-type is {}'.format(self.content_type)
+                self.html = 'not human readable content: content-type is {}'.format(self.content_type)
             if decoding_required:
                 if self.charset:
                     try:
