@@ -164,6 +164,9 @@ Async http request library for python with focus on simplicity
         
         * auth_digest = ('user', 'passwd') #http digest auth
         
+        * verify = True/False # If set to False, it will ignore ssl certificate
+                              # verification. Useful for self signed certificates.
+        
         * binary = True/False # Get html response body in bytes.
         
         * charset = specify character set encoding 
