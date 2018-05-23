@@ -139,7 +139,8 @@ Async HTTP request library for python with focus on simplicity
         
         * session = True/False # Maintain session cookies between requests.
                                # This option will automatically handle setting
-                               # and sending of session cookies.
+                               # and sending of session cookies similar to
+                               # web browser.
         
         * params = {key: value} #use with GET
         
