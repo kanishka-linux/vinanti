@@ -276,12 +276,12 @@ class Vinanti:
             logger.info('\nRequesting url: {}\n'.format(url))
             future = loop.run_in_executor(None, self.__get_request__, url, hdrs, method, kargs)
         else:
-            future = loop.run_in_executor(None, self.__complete_request__, url, hdrs, method, kargs)
+            future = loop.run_in_executor(None, self.__complete_request__, kargs)
         if onfinished:
             future.add_done_callback(partial(onfinished, task_num, url))
         response = await future
         self.tasks_completed.update({task_num:True})
         
-    def __complete_request__(self, url, args, method, kargs):
+    def __complete_request__(self, kargs):
         req_obj = url(*kargs)
         return req_obj
