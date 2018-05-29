@@ -273,7 +273,11 @@ class Vinanti:
         finally:
             self.lock.release()
         self.tasks_completed.update({task_num:True})
-        onfinished(task_num, url, future.result())
+        if future.exception():
+            result = None
+        else:
+            result = future.result()
+        onfinished(task_num, url, result)
         
     async def __start_fetching__(self, url, onfinished, hdrs, task_num, loop, method, kargs):
         if isinstance(url, str):
