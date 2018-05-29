@@ -37,7 +37,7 @@ logger = log_function(__name__)
 class Vinanti:
     
     def __init__(self, backend=None, block=True, log=False,
-                 group_task=False, max_requests=100, **kargs):
+                 group_task=False, max_requests=10, **kargs):
         if backend is None:
             self.backend = 'urllib'
         else:
