@@ -23,7 +23,7 @@ import urllib.parse
 from urllib.parse import urlparse
 import urllib.request
 from functools import partial
-from threading import Thread
+from threading import Thread, Lock
 from collections import OrderedDict
 try:
     from vinanti.req import RequestObject
@@ -66,6 +66,8 @@ class Vinanti:
         self.tasks_completed = {}
         self.tasks_timing = {}
         self.cookie_session = {}
+        self.task_counter = 0
+        self.lock = Lock()
         
     def clear(self):
         self.tasks.clear()
@@ -88,21 +90,11 @@ class Vinanti:
         return len(self.tasks_completed)
     
     def tasks_done(self):
-        tasks_copy = self.tasks_completed.copy()
-        count = 0
-        for key, val in tasks_copy.items():
-            if val:
-                count += 1
-        return count
+        return self.task_counter
         
     def tasks_remaining(self):
-        tasks_copy = self.tasks_completed.copy()
-        count = 0
-        for key, val in tasks_copy.items():
-            if not val:
-                count += 1
-        return count
-    
+        return len(self.tasks_completed) - self.task_counter
+        
     def __build_tasks__(self, urls, method, onfinished=None, hdrs=None, options_dict=None):
         self.tasks.clear()
         if options_dict is None:
@@ -270,6 +262,15 @@ class Vinanti:
             cookie = new_cookie
         if cookie:
             self.cookie_session.update({netloc:cookie})
+            
+    def finished_task_postprocess(self, onfinished, task_num, url, future):
+        self.lock.acquire()
+        try:
+            self.task_counter += 1
+        finally:
+            self.lock.release()
+        self.tasks_completed.update({task_num:True})
+        onfinished(task_num, url, future)
         
     async def __start_fetching__(self, url, onfinished, hdrs, task_num, loop, method, kargs):
         if isinstance(url, str):
@@ -277,10 +278,10 @@ class Vinanti:
             future = loop.run_in_executor(None, self.__get_request__, url, hdrs, method, kargs)
         else:
             future = loop.run_in_executor(None, self.__complete_request__, url, kargs)
+        
         if onfinished:
-            future.add_done_callback(partial(onfinished, task_num, url))
+            future.add_done_callback(partial(self.finished_task_postprocess, onfinished, task_num, url))
         response = await future
-        self.tasks_completed.update({task_num:True})
         
     def __complete_request__(self, func, kargs):
         req_obj = func(*kargs)
