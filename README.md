@@ -53,32 +53,26 @@ Async HTTP request library for python with focus on simplicity
             'http://en.wikipedia.org'
             ]
             
-        vnt = Vinanti(block=True)
+        vnt = Vinanti(block=False)
         
         vnt.get(urls, onfinished=hello, hdrs=hdr)
         
         print('Completed')
-        
-* In above sample code, once vnt.get() gets executed, the main thread will be blocked, but list of urls will be fetched asynchronously. After fetching every url, the **hello** callback function will be called. Once all urls are fetched, it will print 'Completed'.
     
-* Now just replace **Vinanti(block=True)** with **Vinanti(block=False)**, in above code and re-run. It will execute entire code and won't block after vnt.get(). In above code, users will find that it will print 'Completed' immediately, and fetching of urls will keep on going in the background asynchronously.
+* After running above code, users will find that it will print 'Completed' immediately, and fetching of urls will keep on going in the background asynchronously.
     
 * About Callback **hello** function: This function will be called after fetching of every url has been completed. If no parameters are passed to hello function using partial, then callback will return with three parameters. Signature of default hello function looks like below:
         
-        hello(int task_number, str url_name, future_object_with_information)
+        hello(int task_number, str url_name, response_object)
         
-* users can also use: hello(*args) signature, in case arbitrary number of parameters have been passed to hello. In this case, args[-1] will be future_object_with_information, args[-2] will be url_name and args[-3] will be task_number, and rest of parameters will be available in args[0] to onwards.
-    
-* About future_object_with_information: lets call it future. Result of future is available in future.result()
-    
-* Accessing information from future_object: Consider following sample hello callback function:
+* users can also use: hello(*args) signature, in case arbitrary number of parameters have been passed to hello. In this case, args[-1] will be response_object, args[-2] will be url_name and args[-3] will be task_number, and rest of parameters will be available in args[0] to onwards.
+        
+* Accessing information: Consider following sample hello callback function:
         
         def hello(*args):
-            future = args[-1]
+            result = args[-1]
             url_submitted = args[-2]
             task_number = args[-3] # Sequential number of url in url_list
-            
-            result = future.result()
             
             html = result.html #text/html content of fetched url 
             method = result.method #GET,POST, HEAD
@@ -97,7 +91,7 @@ Async HTTP request library for python with focus on simplicity
 
 * Initiliaze: 
         
-        vnt = Vinanti(block=True/False, group_task=True/False)
+        vnt = Vinanti(block=True/False, group_task=True/False, session=True/False)
         
         Note: Parameters passed during initialization will be shared with all following requests
         
@@ -172,9 +166,11 @@ Async HTTP request library for python with focus on simplicity
         
         * charset = specify character set encoding 
         
+        * max_requests = 100 (maximum number of concurrent requests allowed)
+        
         Examples:
         
-        1. vnt = Vinanti(block=False, hdrs={'User-Agent':'Mozilla/5.0'}, onfinished=hello)
+        1. vnt = Vinanti(block=False, hdrs={'User-Agent':'Mozilla/5.0'}, onfinished=hello, max_requests=50)
         
             # Initialize vinanti in non-blocking mode along with default user-agent string
              
@@ -272,7 +268,7 @@ This library has been mainly made for asynchronous http requests, but the same d
         
 ### Finally regular synchronous http requests
 
-Just initialize vinanti with block=None, and perform regular http requests. Sample code is given below. 
+Just initialize vinanti with block=True, and perform regular http requests. Sample code is given below. 
 
         vnt = Vinanti(block=None, hdrs=hdr_dict)
         
