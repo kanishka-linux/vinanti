@@ -4,8 +4,7 @@ import unittest
 from functools import partial
 
 def hello(*args):
-    future = args[-1]
-    result = future.result()
+    result = args[-1]
     if len(args) > 3:
         new_args = args[:-3]
         print(new_args)
@@ -23,7 +22,7 @@ def hello(*args):
             )
 
 def namaste(*args):
-    result = args[-1].result()
+    result = args[-1]
     print('namaste: {} {} html={}'.format(args[-2], result.method, result.html))
     
 class TestVinanti(unittest.TestCase):

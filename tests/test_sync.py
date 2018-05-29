@@ -9,7 +9,7 @@ hdr = {"User-Agent":"Mozilla/5.0"}
 class TestVinanti(unittest.TestCase):
     
     def test_no_async(self):
-        vnt = Vinanti(block=None, hdrs=hdr)
+        vnt = Vinanti(block=True, hdrs=hdr)
         req = vnt.get('http://www.google.com')
         print(req.info)
         req = vnt.post('http://httpbin.org/post', data={'hello':'world'})

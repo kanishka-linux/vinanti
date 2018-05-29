@@ -23,8 +23,7 @@ import unittest
 from functools import partial
 
 def hello(*args):
-    future = args[-1]
-    result = future.result()
+    result = args[-1]
     if len(args) > 3:
         new_args = args[:-3]
         print(new_args)
@@ -47,66 +46,62 @@ def hello(*args):
 
 class TestVinanti(unittest.TestCase):
     
-    urls = [
-        'http://www.yahoo.com', 'http://www.google.com',
-        'http://www.duckduckgo.com',
-        'http://www.yahoo.com', 'http://en.wikipedia.org'
-        ]
+    url = 'http://en.wikipedia.org'
     hdr = {'User-agent':'Mozilla/5.0'}
     
     def test_get(self):
         vnt = Vinanti(block=True)
-        vnt.get(self.urls, onfinished=hello, hdrs=self.hdr)
-        vnt.get(self.urls, onfinished=hello, hdrs=self.hdr)
+        vnt.get(self.url, onfinished=hello, hdrs=self.hdr)
+        vnt.get(self.url, onfinished=hello, hdrs=self.hdr)
         
     def test_head(self):
         vnt = Vinanti(block=True)
-        vnt.head(self.urls, onfinished=hello, hdrs=self.hdr)
+        vnt.head(self.url, onfinished=hello, hdrs=self.hdr)
     
     def test_post(self):
-        urls = ['http://httpbin.org/post', 'http://httpbin.org/post']
+        url = 'http://httpbin.org/post'
         vnt = Vinanti(block=True)
-        vnt.post(urls, onfinished=hello, hdrs=self.hdr, data=(('moe', 'curly'), ('moe', 'larry')))
+        vnt.post(url, onfinished=hello, hdrs=self.hdr, data=(('moe', 'curly'), ('moe', 'larry')))
         
     def test_post_more(self):
-        urls = ['http://httpbin.org/post', 'http://httpbin.org/post']
+        url = 'http://httpbin.org/post'
         vnt = Vinanti(block=True)
-        vnt.post(urls, onfinished=hello, hdrs=self.hdr, data={'yotsubato':'aria','mushishi':'kino'})
+        vnt.post(url, onfinished=hello, hdrs=self.hdr, data={'yotsubato':'aria','mushishi':'kino'})
         
     def test_get_params(self):
-        urls = ['http://httpbin.org/get', 'http://httpbin.org/get']
+        url = 'http://httpbin.org/get'
         vnt = Vinanti(block=True)
-        vnt.get(urls, onfinished=hello, hdrs=self.hdr, params={'billoo':'diamond comics', 'dhruva':'raj comics'})
+        vnt.get(url, onfinished=hello, hdrs=self.hdr, params={'billoo':'diamond comics', 'dhruva':'raj comics'})
     
     def test_without_hdrs(self):
-        urls = ['https://news.ycombinator.com/news', 'https://github.com/']
+        url = 'https://news.ycombinator.com/news'
         vnt = Vinanti(block=True)
-        vnt.get(urls, onfinished=partial(hello, 'test_without_hdrs'))
+        vnt.get(url, onfinished=partial(hello, 'test_without_hdrs'))
         
     def test_without_callback(self):
-        urls = ['https://news.ycombinator.com/news', 'https://github.com/']
+        url = 'https://github.com/'
         vnt = Vinanti(block=True)
-        vnt.get(urls)
+        vnt.get(url)
         
     def test_put(self):
-        urls = ['http://httpbin.org/put', 'http://httpbin.org/put']
+        url = 'http://httpbin.org/put'
         vnt = Vinanti(block=True)
-        vnt.put(urls, onfinished=hello, hdrs=self.hdr, data={'calvin':'hobbes'})
+        vnt.put(url, onfinished=hello, hdrs=self.hdr, data={'calvin':'hobbes'})
         
     def test_delete(self):
-        urls = ['http://httpbin.org/delete', 'http://httpbin.org/delete']
+        url = 'http://httpbin.org/delete'
         vnt = Vinanti(block=True)
-        vnt.delete(urls, onfinished=hello, hdrs=self.hdr, data={'garfield':'peanuts'})
+        vnt.delete(url, onfinished=hello, hdrs=self.hdr, data={'garfield':'peanuts'})
     
     def test_patch(self):
-        urls = ['http://httpbin.org/patch', 'http://httpbin.org/patch']
+        url = 'http://httpbin.org/patch'
         vnt = Vinanti(block=True)
-        vnt.patch(urls, onfinished=hello, hdrs=self.hdr, data={'gotham city':'rajnagar'})
+        vnt.patch(url, onfinished=hello, hdrs=self.hdr, data={'gotham city':'rajnagar'})
         
     def test_options(self):
-        urls = ['http://httpbin.org/get', 'http://httpbin.org/get']
+        url = 'http://httpbin.org/get'
         vnt = Vinanti(block=True)
-        vnt.options(urls, onfinished=hello, hdrs=self.hdr)
+        vnt.options(url, onfinished=hello, hdrs=self.hdr)
         
 if __name__ == '__main__':
     BASEDIR, BASEFILE = os.path.split(os.path.abspath(__file__))

@@ -7,7 +7,7 @@ hdr = {"User-Agent":"Mozilla/5.0"}
 
 def hello(*args):
     print('hello: {}'.format(args[-2]))
-    r = args[-1].result()
+    r = args[-1]
     print(r.html)
     print(r.error)
     

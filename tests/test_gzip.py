@@ -7,7 +7,7 @@ hdr = {"User-Agent":"Mozilla/5.0"}
 
 def hello(*args):
     print('hello: {}'.format(args[-2]))
-    r = args[-1].result()
+    r = args[-1]
     print(r.html)
     print(r.charset)
     print(r.content_encoding)
@@ -16,7 +16,7 @@ def hello(*args):
     
 def hello_world(*args):
     print('hello_world: {}'.format(args[-2]))
-    r = args[-1].result()
+    r = args[-1]
     print(r.html)
     print(r.charset)
     print(r.content_encoding)
@@ -25,7 +25,7 @@ def hello_world(*args):
     
 def hello_world_new(*args):
     print('hello_world new: {}'.format(args[-2]))
-    r = args[-1].result()
+    r = args[-1]
     print(r.html)
     print(r.charset)
     print(r.content_encoding)

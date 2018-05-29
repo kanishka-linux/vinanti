@@ -24,7 +24,7 @@ from functools import partial
 
 def hello(*args):
     future = args[-1]
-    result = future.result()
+    result = future
     if len(args) > 3:
         new_args = args[:-3]
         print(new_args)

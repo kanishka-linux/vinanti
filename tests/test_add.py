@@ -6,35 +6,24 @@ from functools import partial
 hdr = {"User-Agent":"Mozilla/5.0"}
 
 def hello(*args):
-    result = args[-1].result()
+    result = args[-1]
     print('hello: {} {}'.format(args[-2], result.method))
 
 def namaste(*args):
-    result = args[-1].result()
+    result = args[-1]
     print('namaste: {} {}'.format(args[-2], result.method))
 
-    
 def konichiwa(*args):
-    result = args[-1].result()
+    result = args[-1]
     print('konichiwa: {} {}'.format(args[-2], result.method))
 
 def bonjour(*args):
-    result = args[-1].result()
+    result = args[-1]
     print('bonjour: {} {}'.format(args[-2], result.method))
     print(result.html)
     
 
 class TestVinanti(unittest.TestCase):
-    
-    def test_add_block(self):
-        vnt = Vinanti(block=True, group_task=True)
-        vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
-        vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr)
-        vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
-        data_post = (('moe', 'curly'), ('moe', 'larry'))
-        vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data=data_post)
-        vnt.add('http://httpbin.org/get', method='HEAD', onfinished=hello, hdrs=hdr)
-        vnt.start()
         
     def test_add_noblock(self):
         vnt = Vinanti(block=False, group_task=True)
