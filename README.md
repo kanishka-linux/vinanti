@@ -78,7 +78,7 @@ Async HTTP request library for python with focus on simplicity
             html = result.html #text/html content of fetched url 
             method = result.method #GET,POST, HEAD
             error = result.error #Error information if fetching failed
-            url = result.url #Final url location which is fetched
+            url = result.url #Final url location which has been fetched
             status_code = result.status #Status code
             
             cookies = result.session_cookies #If available
@@ -195,23 +195,23 @@ Async HTTP request library for python with focus on simplicity
         
             # Wait for 1 second before making this request
             
-        5. vnt.get('https://www.duckduckgo.com', timeout=4.0)
+        6. vnt.get('https://www.duckduckgo.com', timeout=4.0)
         
             # set timeout for above request
             
-        6. vnt.get('http://www.httpbin.org/ip', proxies={'http':'http://192.168.2.100:9000'})
+        7. vnt.get('http://www.httpbin.org/ip', proxies={'http':'http://192.168.2.100:9000'})
         
             # Use proxy for making request
             
-        7. vnt.get('https://httpbin.org/basic-auth/user/password', auth=('user','password'))
+        8. vnt.get('https://httpbin.org/basic-auth/user/password', auth=('user','password'))
         
             # http basic authentication
             
-        8. vnt.get('https://httpbin.org/digest-auth/auth/usr/passwd', auth_digest=('usr','passwd'))
+        9. vnt.get('https://httpbin.org/digest-auth/auth/usr/passwd', auth_digest=('usr','passwd'))
             
             # http digest authentication
             
-        9. vnt.start() # Start fetching when group_task=True
+        10. vnt.start() # Start fetching when group_task=True
         
 * Accessing few more properties on running tasks:
         
@@ -235,7 +235,9 @@ Async HTTP request library for python with focus on simplicity
         
         vnt.session.clear('en.wikipedia.org'), will clear session cookies related
         
-        to wikipedia. 
+        to wikipedia.
+        
+        3. vnt.clear() # This will reset everything to default values 
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
