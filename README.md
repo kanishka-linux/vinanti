@@ -55,7 +55,8 @@ Async HTTP request library for python with focus on simplicity
             
         vnt = Vinanti(block=False)
         
-        vnt.get(urls, onfinished=hello, hdrs=hdr)
+        for url in urls:
+            vnt.get(url, onfinished=hello, hdrs=hdr)
         
         print('Completed')
     
@@ -72,7 +73,7 @@ Async HTTP request library for python with focus on simplicity
         def hello(*args):
             result = args[-1]
             url_submitted = args[-2]
-            task_number = args[-3] # Sequential number of url in url_list
+            task_number = args[-3] # Sequential number of url
             
             html = result.html #text/html content of fetched url 
             method = result.method #GET,POST, HEAD
