@@ -243,7 +243,7 @@ Async HTTP request library for python with focus on simplicity
         
 * More Explanation on important parameters
 
-    * **session = True/False** 
+    + **session = True/False** 
     
         See following code:
         
@@ -263,31 +263,33 @@ Async HTTP request library for python with focus on simplicity
           
           (See test_cookie_session.py file in tests folder for more details)
           
-    * **max_requests = 10** (default is 10). 
+    + **max_requests = 10** (default is 10). 
      
-       This parameter specifies maximum number of concurrent requests at a time.
+           This parameter specifies maximum number of concurrent requests at a time.
+           
+           Users can fire any number of requests, but only 10 requests will be 
+           
+           processed at a time. All other requests will be queued. Once total executing
+           
+           requests will fall below 10, the first queued item will be removed from waiting queue
+           
+           and will be added to current executing task list for execution.
+           
+           Depending on system specification, users can set this max_requests to 
+           
+           something higher like 100, 200 or even 1000+. 
        
-       Users can fire any number of requests, but only 10 requests will be 
-       
-       processed at a time. All other requests will be queued. Once total executing
-       
-       requests will fall below 10, the first queued item will be removed from waiting queue
-       
-       and will be added to current executing task list for execution.
-       
-       Depending on system specification, users can set this max_requests to 
-       
-       something higher like 100, 200 or even 1000+. 
-       
-    * **group_task = True/False** (default False)
+    + **group_task = True/False** (default False)
     
-        This library was initially designed mainly for executing group of urls
+            This library was initially designed mainly for executing group of urls
+            
+            concurrently, but later on added execution of single request. If user wants
+            
+            to fire 100,001 requests concurrently then he/she should use group_task parameter
+            
+            along with 'add' api and should arrange code in following manner:
         
-        concurrently, but later on added execution of single request. If user wants
-        
-        to fire 100,001 requests concurrently then he/she should use group_task parameter
-        
-        along with 'add' api and should arrange code in following manner:
+            ----------------------------------------------
         
                 vnt = Vinanti(block=False, group_task=True, hdrs=hdr_dict, max_requests=100)
                 
@@ -306,15 +308,19 @@ Async HTTP request library for python with focus on simplicity
                             # Once vnt.tasks_remaining() equals to zero, it means all tasks have
                             # been completed.
         
-        Setting group_task parameter to True will allow managing all requests
+            -----------------------------------------------
         
-        using just one event loop. In single request, new event loop will be created
-        
-        for every request, which is inefficient and mostly ok for small number of 
-        
-        concurrent requests. Consider following code which should be avoided for 
-        
-        large number of requests.
+            Setting group_task parameter to True will allow managing all requests
+            
+            using just one event loop. In single request, new event loop will be created
+            
+            for every request, which is inefficient and mostly ok for small number of 
+            
+            concurrent requests. Consider following code which should be avoided for 
+            
+            large number of requests.
+            
+            -----------------------------------------------
         
                 vnt = Vinanti(block=False, group_task=False, hdrs=hdr_dict, max_requests=100)
                 
@@ -323,23 +329,25 @@ Async HTTP request library for python with focus on simplicity
                 for url in url_list:
                     vnt.get(url, onfinished=hello) #remember here vnt.get is used not vnt.add
                 
+            ------------------------------------------------
+                
             Above code is short and compact, but not efficient.
             
         However, users can try various combinations and should use what is good for them.
         
-    * **wait = In seconds** (This parameter works only domainwise.)
+    + **wait = In seconds** (This parameter works only domainwise.)
     
-        This parameter adds some wait duration in seconds between two consecutive requests
-        
-        to same domain. If this parameter is set during initialization then wait duration will
-        
-        be set for all subsequent requests domainwise. 
-        
-        This parameter along with max_requests will throttle maximum requests to same domain.
-        
-        Developers should use these two parameters carefully and rationally,
-        
-        in order to not to abuse any web based service.
+            This parameter adds some wait duration in seconds between two consecutive requests
+            
+            to same domain. If this parameter is set during initialization then wait duration will
+            
+            be set for all subsequent requests domainwise. 
+            
+            This parameter along with max_requests will throttle maximum requests to same domain.
+            
+            Developers should use these two parameters carefully and rationally,
+            
+            in order to not to abuse any web based service.
         
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
