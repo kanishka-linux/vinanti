@@ -92,7 +92,7 @@ Async HTTP request library for python with focus on simplicity
 
 * Initiliaze: 
         
-        vnt = Vinanti(block=True/False, group_task=True/False, session=True/False)
+        vnt = Vinanti(block=True/False, group_task=True/False, session=True/False, max_requests=50)
         
         Note: Parameters passed during initialization will be shared with all following requests
         
@@ -130,7 +130,7 @@ Async HTTP request library for python with focus on simplicity
         
 * Similar api is for PUT, DELETE, PATCH and OPTIONS
 
-* Some other parameters which can be passed to get, post, head and other http request functions:
+* Some other parameters which can be passed to http request functions or can be used during initialization:
         
         * session = True/False # Maintain session cookies between requests.
                                # This option will automatically handle setting
