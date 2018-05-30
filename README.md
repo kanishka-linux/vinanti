@@ -247,15 +247,15 @@ Async HTTP request library for python with focus on simplicity
     
         See following code:
         
-        1. vnt = Vinanti(block=False, session=True, hdrs=hdr_dict)
-        
-        2. vnt.get(url, auth=(user, passwd), onfinished=hello) # Establish session
-        
-        3. vnt.get(url) # Try to make request to same url without authentication,
-                        # but it won't work
-                        # Why? It is async code, both instructions 2, 3 will
-                        # try to execute concurrently.
-                        
+            1. vnt = Vinanti(block=False, session=True, hdrs=hdr_dict)
+            
+            2. vnt.get(url, auth=(user, passwd), onfinished=hello) # Establish session
+            
+            3. vnt.get(url) # Try to make request to same url without authentication,
+                            # but it won't work
+                            # Why? It is async code, both instructions 2, 3 will
+                            # try to execute concurrently.
+                            
         So, what is correct method of using same session?
         
         * First wait for instruction 2 to complete and then execute instruction 3
@@ -289,22 +289,22 @@ Async HTTP request library for python with focus on simplicity
         
         along with 'add' api and should arrange code in following manner:
         
-            vnt = Vinanti(block=False, group_task=True, hdrs=hdr_dict, max_requests=100)
-            
-            url1 = first_url
-            
-            url_list = [list of 100,000 urls]
-            
-            vnt.get(url1, onfinished=hello)
-            
-            for url in url_list:
-                vnt.add(url, method='GET', onfinished=hello) #remember here vnt.add is used
-            
-            vnt.start() # This instruction will start process of fetching of 100,001 urls.
-                        # In callback hello, users can check aggregate stats on tasks using
-                        # api's like vnt.tasks_done(), vnt.tasks_remaining()
-                        # Once vnt.tasks_remaining() equals to zero, it means all tasks have
-                        # been completed.
+                vnt = Vinanti(block=False, group_task=True, hdrs=hdr_dict, max_requests=100)
+                
+                url1 = first_url
+                
+                url_list = [list of 100,000 urls]
+                
+                vnt.get(url1, onfinished=hello)
+                
+                for url in url_list:
+                    vnt.add(url, method='GET', onfinished=hello) #remember here vnt.add is used
+                
+                vnt.start() # This instruction will start process of fetching of 100,001 urls.
+                            # In callback hello, users can check aggregate stats on tasks using
+                            # api's like vnt.tasks_done(), vnt.tasks_remaining()
+                            # Once vnt.tasks_remaining() equals to zero, it means all tasks have
+                            # been completed.
         
         Setting group_task parameter to True will allow managing all requests
         
@@ -316,12 +316,12 @@ Async HTTP request library for python with focus on simplicity
         
         large number of requests.
         
-            vnt = Vinanti(block=False, group_task=False, hdrs=hdr_dict, max_requests=100)
-            
-            url_list = [list of 100,001 urls]
-            
-            for url in url_list:
-                vnt.get(url, onfinished=hello) #remember here vnt.get is used not vnt.add
+                vnt = Vinanti(block=False, group_task=False, hdrs=hdr_dict, max_requests=100)
+                
+                url_list = [list of 100,001 urls]
+                
+                for url in url_list:
+                    vnt.get(url, onfinished=hello) #remember here vnt.get is used not vnt.add
                 
             Above code is short and compact, but not efficient.
             
