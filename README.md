@@ -273,7 +273,7 @@ This library has been mainly made for asynchronous http requests, but the same d
 
 Just initialize vinanti with block=True, and perform regular http requests. Sample code is given below. 
 
-        vnt = Vinanti(block=None, hdrs=hdr_dict)
+        vnt = Vinanti(block=True, hdrs=hdr_dict)
         
         req = vnt.get(url)
         
