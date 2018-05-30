@@ -243,7 +243,7 @@ Async HTTP request library for python with focus on simplicity
         
 * More Explanation on important parameters
 
-    1. session = True/False : 
+    * **session = True/False** 
     
         See following code:
         
@@ -263,7 +263,7 @@ Async HTTP request library for python with focus on simplicity
           
           (See test_cookie_session.py file in tests folder for more details)
           
-    2. max_requests = 10 (default is 10). 
+    * **max_requests = 10** (default is 10). 
      
        This parameter specifies maximum number of concurrent requests at a time.
        
@@ -279,7 +279,7 @@ Async HTTP request library for python with focus on simplicity
        
        something higher like 100, 200 or even 1000+. 
        
-    3. group_task = True/False
+    * **group_task = True/False** (default False)
     
         This library was initially designed mainly for executing group of urls
         
@@ -327,7 +327,7 @@ Async HTTP request library for python with focus on simplicity
             
         However, users can try various combinations and should use what is good for them.
         
-    4. wait = In seconds (This parameter works only domainwise.)
+    * **wait = In seconds** (This parameter works only domainwise.)
     
         This parameter adds some wait duration in seconds between two consecutive requests
         
