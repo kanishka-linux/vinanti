@@ -135,7 +135,7 @@ Async HTTP request library for python with focus on simplicity
         * session = True/False # Maintain session cookies between requests.
                                # This option will automatically handle setting
                                # and sending of session cookies similar to
-                               # web browser.
+                               # web browser. Default is False
         
         * params = {key: value} #use with GET
         
@@ -167,7 +167,7 @@ Async HTTP request library for python with focus on simplicity
         
         * charset = specify character set encoding 
         
-        * max_requests = 100 (maximum number of concurrent requests allowed)
+        * max_requests = maximum number of concurrent requests allowed (default value is 10)
         
         Examples:
         
@@ -175,7 +175,9 @@ Async HTTP request library for python with focus on simplicity
         
             # Initialize vinanti in non-blocking mode along with default user-agent string
              
-             and same callback function hello for all following requests.
+             and same callback function hello for all following requests, with maximum limit
+             
+             of concurrent requests set to 50.
              
         2. vnt.get('http://httpbin.org/get', params={'hello':'world'})
         
@@ -239,6 +241,107 @@ Async HTTP request library for python with focus on simplicity
         
         3. vnt.clear() # This will reset everything to default values 
         
+* More Explanation on important parameters
+
+    1. session = True/False : 
+    
+        See following code:
+        
+        1. vnt = Vinanti(block=False, session=True, hdrs=hdr_dict)
+        
+        2. vnt.get(url, auth=(user, passwd), onfinished=hello) # Establish session
+        
+        3. vnt.get(url) # Try to make request to same url without authentication,
+                        # but it won't work
+                        # Why? It is async code, both instructions 2, 3 will
+                        # try to execute concurrently.
+                        
+        So, what is correct method of using same session?
+        
+        * First wait for instruction 2 to complete and then execute instruction 3
+          and all other subsequent http requests in callback hello function. 
+          
+          (See test_cookie_session.py file in tests folder for more details)
+          
+    2. max_requests = 10 (default is 10). 
+     
+       This parameter specifies maximum number of concurrent requests at a time.
+       
+       Users can fire any number of requests, but only 10 requests will be 
+       
+       processed at a time. All other requests will be queued. Once total executing
+       
+       requests will fall below 10, the first queued item will be removed from waiting queue
+       
+       and will be added to current executing task list for execution.
+       
+       Depending on system specification, users can set this max_requests to 
+       
+       something higher like 100, 200 or even 1000+. 
+       
+    3. group_task = True/False
+    
+        This library was initially designed mainly for executing group of urls
+        
+        concurrently, but later on added execution of single request. If user wants
+        
+        to fire 100,001 requests concurrently then he/she should use group_task parameter
+        
+        along with 'add' api and should arrange code in following manner:
+        
+            vnt = Vinanti(block=False, group_task=True, hdrs=hdr_dict, max_requests=100)
+            
+            url1 = first_url
+            
+            url_list = [list of 100,000 urls]
+            
+            vnt.get(url1, onfinished=hello)
+            
+            for url in url_list:
+                vnt.add(url, method='GET', onfinished=hello) #remember here vnt.add is used
+            
+            vnt.start() # This instruction will start process of fetching of 100,001 urls.
+                        # In callback hello, users can check aggregate stats on tasks using
+                        # api's like vnt.tasks_done(), vnt.tasks_remaining()
+                        # Once vnt.tasks_remaining() equals to zero, it means all tasks have
+                        # been completed.
+        
+        Setting group_task parameter to True will allow managing all requests
+        
+        using just one event loop. In single request, new event loop will be created
+        
+        for every request, which is inefficient and mostly ok for small number of 
+        
+        concurrent requests. Consider following code which should be avoided for 
+        
+        large number of requests.
+        
+            vnt = Vinanti(block=False, group_task=False, hdrs=hdr_dict, max_requests=100)
+            
+            url_list = [list of 100,001 urls]
+            
+            for url in url_list:
+                vnt.get(url, onfinished=hello) #remember here vnt.get is used not vnt.add
+                
+            Above code is short and compact, but not efficient.
+            
+        However, users can try various combinations and should use what is good for them.
+        
+    4. wait = In seconds (This parameter works only domainwise.)
+    
+        This parameter adds some wait duration in seconds between two consecutive requests
+        
+        to same domain. If this parameter is set during initialization then wait duration will
+        
+        be set for all subsequent requests domainwise. 
+        
+        This parameter along with max_requests will throttle maximum requests to same domain.
+        
+        Developers should use these two parameters carefully and rationally,
+        
+        in order to not to abuse any web based service.
+        
+        
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
 ### Some more fun
@@ -253,7 +356,7 @@ This library has been mainly made for asynchronous http requests, but the same d
         
         vnt = Vinanti(block=False/True, group_task=True) # Other parameters can be passed during initialization
                     
-                                                        but they won't be of any use in the case of functions.
+                                                        but they won't work in the case of functions.
         
         vnt.function(hello_world, rest parameters to hello_world, onfinished=hello)
         
@@ -288,11 +391,13 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
         cookies = req.session_cookies
         
 
-### Sample application using Vinanti
+### Sample applications using Vinanti
 
-A sample application using Vinati is available [here](https://github.com/kanishka-linux/WebComics). It is PyQt application. In qt based applications, fetching urls on one hand and keeping GUI responsive on the other hand is bit cumbersome. In order to keep qt gui responsive, one needs to spin thread (for fetching urls) and then GUI needs to be updated using signal/slot mechanism. The application tries do similar thing using Vinanti, but without external threads and signal/slot mechanism. It intializes Vinanti with **block=False**, and tries to achieve same thing using callback mechanism.
+1. A sample application using Vinati is available [here](https://github.com/kanishka-linux/WebComics). It is PyQt application. In qt based applications, fetching urls on one hand and keeping GUI responsive on the other hand is bit cumbersome. In order to keep qt gui responsive, one needs to spin thread (for fetching urls) and then GUI needs to be updated using signal/slot mechanism. The application tries do similar thing using Vinanti, but without external threads and signal/slot mechanism. It intializes Vinanti with **block=False**, and tries to achieve same thing using callback mechanism.
 
 Note: This approach may work for simple pyqt applications. For complicated applications, it is better to use custom signal/slot mechanism along with vinanti.
+
+2. This library has also been used in [this application](https://github.com/kanishka-linux/kawaii-player), in order to manage session between master and slave in pc-to-pc casting mode. In pc-to-pc casting mode, the master computer can send videos to slave computer for playback, which will be then controlled by master. If username and password has been set for slave, along with cookies, then authentication and cookies are managed by vinanti in non-blocking mode.
 
 ### Sample library using Vinanti
 
@@ -300,7 +405,7 @@ A sample [tvdb-async](https://github.com/kanishka-linux/tvdb-async) library is a
     
 ### Motivation for writing the library
 
-Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make simple url requests and that too in mostly synchronous code. So accordingly, this library has been designed with as simple api as possible, with everything about content will be handled by callback function.
+Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make simple url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible, with everything about content will be handled by callback function.
 
 ### About word Vinanti
 
