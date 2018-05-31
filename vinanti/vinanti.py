@@ -25,6 +25,7 @@ import urllib.request
 from functools import partial
 from threading import Thread, Lock
 from collections import OrderedDict, deque
+from concurrent.futures import ThreadPoolExecutor
 try:
     from vinanti.req import RequestObject
     from vinanti.log import log_function
@@ -68,6 +69,7 @@ class Vinanti:
         self.new_lock = Lock()
         self.task_queue = deque()
         self.max_requests = max_requests
+        self.executor = ThreadPoolExecutor(max_workers=max_requests)
         
     def clear(self):
         self.tasks.clear()
@@ -283,9 +285,9 @@ class Vinanti:
     async def __start_fetching__(self, url, onfinished, hdrs, task_num, loop, method, kargs):
         if isinstance(url, str):
             logger.info('\nRequesting url: {}\n'.format(url))
-            future = loop.run_in_executor(None, self.__get_request__, url, hdrs, method, kargs)
+            future = loop.run_in_executor(self.executor, self.__get_request__, url, hdrs, method, kargs)
         else:
-            future = loop.run_in_executor(None, self.__complete_request__, url, kargs)
+            future = loop.run_in_executor(self.executor, self.__complete_request__, url, kargs)
         
         if onfinished:
             future.add_done_callback(partial(self.finished_task_postprocess, onfinished, task_num, url))
