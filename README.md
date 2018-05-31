@@ -195,7 +195,7 @@ Async HTTP request library for python with focus on simplicity
             
         5. vnt.get('https://www.duckduckgo.com', wait=1.0)
         
-            # Wait for 1 second before making this request
+            # Wait for 1 second if this is second request to duckduckgo.com
             
         6. vnt.get('https://www.duckduckgo.com', timeout=4.0)
         
