@@ -280,60 +280,34 @@ Async HTTP request library for python with focus on simplicity
            something higher like 20, 30 or even 100+. 
        
     + **group_task = True/False** (default False)
-    
-            This library was initially designed mainly for executing group of urls
-            
-            concurrently, but later on added execution of single request. If user wants
-            
-            to fire 100,001 requests concurrently then he/she should use group_task parameter
-            
-            along with 'add' api and should arrange code in following manner:
-        
-            ----------------------------------------------
         
                 vnt = Vinanti(block=False, group_task=True, hdrs=hdr_dict, max_requests=100)
                 
                 url1 = first_url
                 
-                url_list = [list of 100,000 urls]
+                url2 = second_url
                 
-                vnt.get(url1, onfinished=hello)
+                url3 = third_url
                 
-                for url in url_list:
-                    vnt.add(url, method='GET', onfinished=hello) #remember here vnt.add is used
+                vnt.get(url1, onfinished=hello) # First request.
+                                                # If group_task would have been
+                                                # False then
+                                                # fetching of url1 would
+                                                # have been started immediately.
+                                                
+                vnt.add(url2, method='GET', onfinished=new_hello)
+                        
+                        # Append url2 to group_task with GET method
+                        # and different callback
+                        
+                vnt.add(url3, method='POST', data={'usr':'id'}, onfinshed=hello_world)
+                        
+                        # Append url3 to group_task with POST method
+                        # and different callback
+                        
+                vnt.start() # Process of fetching will start at this point
                 
-                vnt.start() # This instruction will start process of fetching of 100,001 urls.
-                            # In callback hello, users can check aggregate stats on tasks using
-                            # api's like vnt.tasks_done(), vnt.tasks_remaining()
-                            # Once vnt.tasks_remaining() equals to zero, it means all tasks have
-                            # been completed.
-        
-            -----------------------------------------------
-        
-            Setting group_task parameter to True will allow managing all requests
-            
-            using just one event loop. In single request, new event loop will be created
-            
-            for every request, which is inefficient and mostly ok for small number of 
-            
-            concurrent requests. Consider following code which should be avoided for 
-            
-            large number of requests.
-            
-            -----------------------------------------------
-        
-                vnt = Vinanti(block=False, group_task=False, hdrs=hdr_dict, max_requests=100)
-                
-                url_list = [list of 100,001 urls]
-                
-                for url in url_list:
-                    vnt.get(url, onfinished=hello) #remember here vnt.get is used not vnt.add
-                
-            ------------------------------------------------
-                
-            Above code is short and compact, but not efficient.
-            
-        However, users can try various combinations and should use what is good for them.
+        + Use this api depending on need.
         
     + **wait = In seconds** (This parameter works only domainwise.)
     
