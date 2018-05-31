@@ -277,7 +277,7 @@ Async HTTP request library for python with focus on simplicity
            
            Depending on system specification, users can set this max_requests to 
            
-           something higher like 100, 200 or even 1000+. 
+           something higher like 20, 30 or even 100+. 
        
     + **group_task = True/False** (default False)
     
