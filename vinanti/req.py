@@ -119,7 +119,7 @@ class RequestObject:
             r_open = None
             self.error = str(err)
             logger.error(err)
-        ret_obj = CreateReturnObject(self, r_open, cj)
+        ret_obj = ResponseObject(self, r_open, cj)
         return ret_obj
     
     def add_http_auth(self, auth_tuple, auth_type, opener=None):
@@ -183,7 +183,7 @@ class RequestObject:
         return opener
         
         
-class CreateReturnObject:
+class ResponseObject:
     
     def __init__(self, parent, req, cj):
         self.method = parent.method
