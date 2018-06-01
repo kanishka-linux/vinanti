@@ -104,7 +104,10 @@ Async HTTP request library for python with focus on simplicity
         
         1. group_task = True/False (default False)
         
-        2. session = True/False (default False)
+        2. session = True/False (default False) # Maintain session cookies between requests.
+                                                # This option will automatically handle setting
+                                                # and sending of session cookies similar to
+                                                # web browser. Default is False
         
         3. max_requests = maximum concurrent requests (default 10)
         
@@ -143,11 +146,6 @@ Async HTTP request library for python with focus on simplicity
 * Similar api is for PUT, DELETE, PATCH and OPTIONS
 
 * Some other parameters which can be passed to http request functions or can be used during initialization:
-        
-        * session = True/False # Maintain session cookies between requests.
-                               # This option will automatically handle setting
-                               # and sending of session cookies similar to
-                               # web browser. Default is False
         
         * params = {key: value} #use with GET
         
