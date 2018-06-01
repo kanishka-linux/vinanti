@@ -1,6 +1,6 @@
 # Vinanti
 
-Async HTTP request library for python with focus on simplicity
+Async non-blocking HTTP library for python with focus on simplicity
 
 
 ### Installation
