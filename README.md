@@ -71,11 +71,11 @@ Async HTTP request library for python with focus on simplicity
 * Accessing information: Consider following sample hello callback function:
         
         def hello(*args):
-            result = args[-1]
+            result = args[-1] #Response object
             
-            url_submitted = args[-2]
+            url_submitted = args[-2] #Submitted url
             
-            task_number = args[-3] # Sequential number of url
+            task_number = args[-3] #Sequential number of url
             
             if result: # Check if result is available or not
             
@@ -91,7 +91,7 @@ Async HTTP request library for python with focus on simplicity
                 
                 cookies = result.session_cookies #If available
                 
-                header_info = result.info # Dictionary of header information
+                header_info = result.info #Dictionary of header information
                 
                 content_type = header_info['content-type'] 
                 
