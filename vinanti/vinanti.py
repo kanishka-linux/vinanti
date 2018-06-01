@@ -20,29 +20,29 @@ along with vinanti.  If not, see <http://www.gnu.org/licenses/>.
 import time
 import asyncio
 import urllib.parse
-from urllib.parse import urlparse
 import urllib.request
 from functools import partial
+from urllib.parse import urlparse
 from threading import Thread, Lock
 from collections import OrderedDict, deque
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
+
 try:
     from vinanti.req import RequestObject
     from vinanti.log import log_function
 except ImportError:
     from req import RequestObject
     from log import log_function
+    
 logger = log_function(__name__)
 
 
 class Vinanti:
     
-    def __init__(self, backend=None, block=False, log=False,
-                 group_task=False, max_requests=10, **kargs):
-        if backend is None:
-            self.backend = 'urllib'
-        else:
-            self.backend = backend
+    def __init__(self, backend='urllib', block=False, log=False,
+                 group_task=False, max_requests=10, multiprocess=False, 
+                 **kargs):
+        self.backend = backend
         self.block = block
         self.tasks = OrderedDict()
         self.loop_nonblock_list = []
@@ -69,7 +69,12 @@ class Vinanti:
         self.new_lock = Lock()
         self.task_queue = deque()
         self.max_requests = max_requests
-        self.executor = ThreadPoolExecutor(max_workers=max_requests)
+        self.multiprocess = multiprocess
+        if self.multiprocess:
+            self.executor = ProcessPoolExecutor(max_workers=max_requests)
+        else:
+            self.executor = ThreadPoolExecutor(max_workers=max_requests)
+        logger.info('multiprocess: {}; max_workers={}'.format(multiprocess, max_requests))
         
     def clear(self):
         self.tasks.clear()
@@ -111,7 +116,10 @@ class Vinanti:
             logger.info(urls)
             if isinstance(urls, str):
                 length_new = len(self.tasks_completed)
-                req = self.__get_request__(urls, hdrs, method, options_dict)
+                session, netloc = self.__request_preprocess__(urls, hdrs, method, options_dict)
+                req = __get_request__(self.backend, urls, hdrs, method, options_dict)
+                if session and req and netloc:
+                    self.__update_session_cookies__(req, netloc)
                 self.tasks_completed.update({length_new:[True, urls]})
                 self.task_counter += 1
                 if onfinished:
@@ -178,6 +186,11 @@ class Vinanti:
         length = len(self.tasks)
         self.tasks.update({length:task_list})
         self.tasks_completed.update({length_new:[False, urls]})
+        if self.tasks_remaining() < self.max_requests:
+            self.tasks.update({length:task_list})
+        else:
+            self.task_queue.append(task_list)
+            logger.info('queueing task')
     
     def add(self, urls, onfinished=None, hdrs=None, method=None, **kargs):
         if self.session_params:
@@ -229,6 +242,7 @@ class Vinanti:
             hdrs.update({'Cookie':new_cookie})
         return hdrs
     
+    """
     def __get_request__(self, url, hdrs, method, kargs):
         n = urlparse(url)
         netloc = n.netloc
@@ -254,6 +268,25 @@ class Vinanti:
             if session:
                 self.__update_session_cookies__(req_obj, netloc)
         return req_obj
+    """
+    
+    def __request_preprocess__(self, url, hdrs, method, kargs):
+        n = urlparse(url)
+        netloc = n.netloc
+        old_time = self.tasks_timing.get(netloc)
+        wait_time = kargs.get('wait')
+        session = kargs.get('session')
+        if session:
+            hdrs = self.__update_hdrs__(hdrs, netloc)
+        if old_time and wait_time:
+            time_diff = time.time() - old_time
+            while(time_diff < wait_time):
+                logger.info('waiting in queue..{} for {}s'.format(netloc, wait_time))
+                time.sleep(wait_time)
+                time_diff = time.time() - self.tasks_timing.get(netloc)
+        self.tasks_timing.update({netloc:time.time()})
+        kargs.update({'log':self.log})
+        return session, netloc
         
     def __update_session_cookies__(self, req_obj, netloc):
         old_cookie = self.cookie_session.get(netloc)
@@ -269,7 +302,8 @@ class Vinanti:
         if cookie:
             self.cookie_session.update({netloc:cookie})
             
-    def finished_task_postprocess(self, onfinished, task_num, url, future):
+    def finished_task_postprocess(self, session, netloc, onfinished,
+                                  task_num, url, future):
         self.lock.acquire()
         try:
             self.task_counter += 1
@@ -280,20 +314,29 @@ class Vinanti:
             result = None
         else:
             result = future.result()
+        if session and result and netloc:
+            self.__update_session_cookies__(result, netloc)
         onfinished(task_num, url, result)
         
     async def __start_fetching__(self, url, onfinished, hdrs, task_num, loop, method, kargs):
+        session = None
+        netloc = None
         if isinstance(url, str):
             logger.info('\nRequesting url: {}\n'.format(url))
-            future = loop.run_in_executor(self.executor, self.__get_request__, url, hdrs, method, kargs)
+            session, netloc = self.__request_preprocess__(url, hdrs, method, kargs)
+            future = loop.run_in_executor(self.executor, __get_request__, self.backend, url, hdrs, method, kargs)
         else:
-            future = loop.run_in_executor(self.executor, self.__complete_request__, url, kargs)
+            future = loop.run_in_executor(self.executor, __complete_function_request__, url, kargs)
         
         if onfinished:
-            future.add_done_callback(partial(self.finished_task_postprocess, onfinished, task_num, url))
+            future.add_done_callback(partial(self.finished_task_postprocess, session, netloc, onfinished, task_num, url))
             
         response = await future
         
+        if session and response and not onfinished:
+            self.__update_session_cookies__(response, netloc)
+            print('updating response hdr {}'.format(netloc))
+                
         if not onfinished:
             self.new_lock.acquire()
             try:
@@ -307,7 +350,16 @@ class Vinanti:
             task_dict = {'0':task_list}
             self.start(task_dict, True)
             logger.info('starting--queued--task')
-            
-    def __complete_request__(self, func, kargs):
-        req_obj = func(*kargs)
-        return req_obj
+
+
+def __complete_function_request__(func, kargs):
+    req_obj = func(*kargs)
+    return req_obj
+
+
+def __get_request__(backend, url, hdrs, method, kargs):
+    req_obj = None
+    if backend == 'urllib':
+        req = RequestObject(url, hdrs, method, kargs)
+        req_obj = req.process_request()
+    return req_obj
