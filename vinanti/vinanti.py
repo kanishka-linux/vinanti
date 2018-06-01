@@ -335,7 +335,7 @@ class Vinanti:
         
         if session and response and not onfinished:
             self.__update_session_cookies__(response, netloc)
-            print('updating response hdr {}'.format(netloc))
+            logger.info('updating response hdr for {}'.format(netloc))
                 
         if not onfinished:
             self.new_lock.acquire()
