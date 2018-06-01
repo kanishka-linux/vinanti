@@ -72,21 +72,32 @@ Async HTTP request library for python with focus on simplicity
         
         def hello(*args):
             result = args[-1]
+            
             url_submitted = args[-2]
+            
             task_number = args[-3] # Sequential number of url
             
-            html = result.html #text/html content of fetched url 
-            method = result.method #GET,POST, HEAD
-            error = result.error #Error information if fetching failed
-            url = result.url #Final url location which has been fetched
-            status_code = result.status #Status code
+            if result: # Check if result is available or not
             
-            cookies = result.session_cookies #If available
-            
-            header_info = result.info # Dictionary of header information
-            content_type = header_info['content-type'] 
-            content_length = header_info['content-length']
-            #check header_info for more details
+                html = result.html #text/html content of fetched url 
+                
+                method = result.method #GET,POST, HEAD etc..
+                
+                error = result.error #Error information if fetching failed
+                
+                url = result.url #Final url location which has been fetched
+                
+                status_code = result.status #Status code
+                
+                cookies = result.session_cookies #If available
+                
+                header_info = result.info # Dictionary of header information
+                
+                content_type = header_info['content-type'] 
+                
+                content_length = header_info['content-length']
+                
+                #check header_info for more details
 
 ### Sample API Usage
 
