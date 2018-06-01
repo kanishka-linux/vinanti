@@ -29,5 +29,5 @@ setup(
     long_description="README.md",
     packages=['vinanti'],
     include_package_data=True,
-    description="Async http request library",
+    description="Async non-blocking HTTP library for python",
 )
