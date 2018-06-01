@@ -402,7 +402,7 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
 
 + Note: This approach may work for simple pyqt applications. For complicated applications, it is better to use custom signal/slot mechanism along with vinanti.
 
-2. This library has also been used in [this application](https://github.com/kanishka-linux/kawaii-player), in order to manage session between master and slave in pc-to-pc casting mode. In pc-to-pc casting mode, the master computer can send videos to slave computer for playback, which will be then controlled by master. If username and password has been set for slave, along with cookies, then authentication and cookies are managed by vinanti in non-blocking mode.
+2. Vinanti has also been used in [this application](https://github.com/kanishka-linux/kawaii-player), in order to manage session between master and slave in pc-to-pc casting mode. In pc-to-pc casting mode, the master computer can send videos to slave computer for playback, which will be then controlled by master. If username and password has been set for slave, along with cookies, then authentication and cookies are managed by vinanti in non-blocking mode.
 
 ### Sample library using Vinanti
 
