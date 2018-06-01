@@ -92,13 +92,25 @@ Async HTTP request library for python with focus on simplicity
 
 * Initiliaze: 
         
-        vnt = Vinanti(block=True/False, group_task=True/False, session=True/False, max_requests=50)
+        vnt = Vinanti(block=True/False)
         
         Note: Parameters passed during initialization will be shared with all following requests
         
         Eg. if header value is set during initialization then rest of the requests will
         
         share the same header, unless it is overridden by a particular request.
+        
+        Some other important parameters which can be passed during initialization:
+        
+        1. group_task = True/False (default False)
+        
+        2. session = True/False (default False)
+        
+        3. max_requests = maximum concurrent requests (default 10)
+        
+        4. multiprocess = True/False (default False) # This parameter will allow
+                                                     # using separate process
+                                                     # for every request.
 
 * GET: 
         
@@ -166,8 +178,6 @@ Async HTTP request library for python with focus on simplicity
         * binary = True/False # Get html response body in bytes.
         
         * charset = specify character set encoding 
-        
-        * max_requests = maximum number of concurrent requests allowed (default value is 10)
         
         Examples:
         
@@ -278,6 +288,10 @@ Async HTTP request library for python with focus on simplicity
            Depending on system specification, users can set this max_requests to 
            
            something higher like 20, 30 or even 100+. 
+           
+           If multiprocess is set to True during initialization then this many number
+           
+           of processes will be created to manage requests concurrently.
        
     + **group_task = True/False** (default False)
         
