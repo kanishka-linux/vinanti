@@ -2,6 +2,9 @@
 
 Async non-blocking HTTP library for python with focus on simplicity
 
+### Motivation for writing the library
+
+Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make simple url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible (using combination of async/await and concurrent.futures), with everything about content will be handled by callback function.
 
 ### Installation
 
@@ -407,10 +410,6 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
 ### Sample library using Vinanti
 
 A sample [tvdb-async](https://github.com/kanishka-linux/tvdb-async) library is also available. This library allows fetching of tv series metadata from thetvdb.com in async manner as it is made available.
-    
-### Motivation for writing the library
-
-Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make simple url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible (using combination of async/await and concurrent.futures), with everything about content will be handled by callback function.
 
 ### About word Vinanti
 
