@@ -23,16 +23,19 @@ import gzip
 import time
 import shutil
 import base64
+import asyncio
 import urllib.parse
 import urllib.request
 import http.cookiejar
 from io import StringIO, BytesIO
+
 try:
     from vinanti.log import log_function
     from vinanti.formdata import Formdata
 except ImportError:
     from log import log_function
     from formdata import Formdata
+    
 logger = log_function(__name__)
 
 
@@ -121,7 +124,69 @@ class RequestObject:
             logger.error(err)
         ret_obj = ResponseObject(self, r_open, cj)
         return ret_obj
-    
+        
+    async def process_aio_request(self, session):
+        func = self.get_aio_request_func(session)
+        ret_obj = None
+        async with func as resp:
+            ret_obj = ResponseObject(self, None, None, 'aiohttp')
+            ret_obj.info = resp.headers
+            text = None
+            if self.method != 'HEAD':
+                if self.out:
+                    with open(self.out, 'wb') as fd:
+                        while True:
+                            chunk = await resp.content.read(1024)
+                            if not chunk:
+                                break
+                            fd.write(chunk)
+                else:
+                    if self.binary:
+                        text = await resp.read()
+                    elif self.charset:
+                        text = await resp.text(encoding=self.charset)
+                    else:
+                        text = await resp.text(encoding='utf-8')
+            ret_obj.html = text
+            ret_obj.status = resp.status
+            ret_obj.content_type = ret_obj.info.get('content-type')
+            ret_obj.url = str(resp.url)
+            cj_arr = []
+            for c in session.cookie_jar:
+                cj_arr.append('{}={}'.format(c.key, c.value))
+            ret_obj.session_cookies = ';'.join(cj_arr)
+        return ret_obj
+        
+    def get_aio_request_func(self, session):
+        if self.method == 'GET':
+            func = session.get
+        elif self.method == 'POST':
+            func = session.post
+        elif self.method == 'PUT':
+            func = session.put
+        elif self.method == 'PATCH':
+            func = session.patch
+        elif self.method == 'DELETE':
+            func = session.delete
+        elif self.method == 'HEAD':
+            func = session.head
+        elif self.method == 'OPTIONS':
+            func = session.options
+        if self.timeout is None:
+            self.timeout = 300
+        if self.verify is False:
+            verify = False
+        else:
+            verify = True
+        http_proxy = None
+        if self.proxies:
+            http_proxy = self.proxies.get('http')
+            if not http_proxy:
+                http_proxy = self.proxies.get('https')
+        new_func = func(self.url, headers=self.hdrs, timeout=self.timeout,
+                        ssl=verify, proxy=http_proxy, data=self.data)
+        return new_func
+                
     def add_http_auth(self, auth_tuple, auth_type, opener=None):
         logger.info(auth_type)
         usr = auth_tuple[0]
@@ -185,13 +250,13 @@ class RequestObject:
         
 class ResponseObject:
     
-    def __init__(self, parent, req, cj):
+    def __init__(self, parent, req, cj, backend='urllib'):
         self.method = parent.method
         self.error = parent.error
         self.session_cookies = None
         self.charset = None
         self.html = None
-        if req:
+        if req and backend != 'aiohttp':
             self.set_information(req, parent)
             self.set_session_cookies(cj)
         else:
