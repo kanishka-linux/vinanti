@@ -75,7 +75,7 @@ class Vinanti:
         self.task_queue = deque()
         self.max_requests = max_requests
         self.multiprocess = multiprocess
-        if self.backend == 'urllib':
+        if self.backend in ['urllib', 'function']:
             if self.multiprocess:
                 self.executor = ProcessPoolExecutor(max_workers=max_requests)
             else:
