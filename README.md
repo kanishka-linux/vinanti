@@ -384,7 +384,7 @@ No. Its only advantage is, easy to use api without knowing anything about async 
 
 ### Some more fun
 
-This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions, which will be executed in the background. In order to pass functions instead of urls, developers have to use api in following manner
+This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions. In order to pass functions instead of urls, developers have to use api in following manner
         
         def hello_world(*args):
             print("hello world")
