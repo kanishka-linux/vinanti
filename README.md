@@ -12,14 +12,15 @@ Those who prefer writing synchronous code but need to make asynchronous HTTP req
 
 ### Is there any other advantage?
 
-No. Its only advantage is, easy to use api without knowing anything about async feature of python. Featurewise, it may not be rich compared to other HTTP clients, at the moment, in other areas.
- 
+No. Featurewise, it might not be rich compared to other HTTP clients, at the moment. Its only advantage is, easy to use api which doesn't require knowing anything about async feature of python at the user level. Possibly, it will try to add many other features in future. But currently its main focus is to explore/experiment whether it is possible to build api's to async libraries without users having to deal with async related code/syntax themselves.
 
 ### How async is achieved?
 
-1. **Using concurrent.futures:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. Good for small number of async requests.
+There are two ways to achieve it in this library.
 
-2. **Using aiohttp:** Using aiohttp as backend, real async can be achieved. Users need to install aiohttp using command:
+1. **Using concurrent.futures:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. It can be called pseudo async, mostly good for small number of async requests.
+
+2. **Using aiohttp:** Using aiohttp as backend, **real async** can be achieved. Users need to install aiohttp using command:
 
         $ (sudo) pip/pip3 install aiohttp
         
@@ -447,15 +448,13 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
 
 ## Some Performance Issues
 
-+ In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's default connection pool. In order to use aiohttp's default connection pool, vinanti might have to use async related keywords at api level, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code.
++ In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's default connection pool. In order to use aiohttp's default connection pool, vinanti might have to use async related keywords at api level, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code. Apart from this, there are still many corner cases that need improvement/fixes.  
 
 ## Sample applications using Vinanti
 
 1. A sample application using Vinati is available [here](https://github.com/kanishka-linux/WebComics). It is PyQt application. In qt based applications, fetching urls on one hand and keeping GUI responsive on the other hand is bit cumbersome. In order to keep qt gui responsive, one needs to spin thread (for fetching urls) and then GUI needs to be updated using signal/slot mechanism. The application tries do similar thing using Vinanti, but without external threads and signal/slot mechanism. It intializes Vinanti with **block=False**, and tries to achieve same thing using callback mechanism.
 
 + Note: This approach may work for simple pyqt applications. For complicated applications, it is better to use custom signal/slot mechanism along with vinanti.
-
-2. Vinanti has also been used in [this application](https://github.com/kanishka-linux/kawaii-player), in order to manage session between master and slave in pc-to-pc casting mode. In pc-to-pc casting mode, the master computer can send videos to slave computer for playback, which will be then controlled by master. If username and password has been set for slave, along with cookies, then authentication and cookies are managed by vinanti in non-blocking mode.
 
 ## Sample library using Vinanti
 
