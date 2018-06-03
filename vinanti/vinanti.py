@@ -144,7 +144,11 @@ class Vinanti:
                 self.tasks_completed.update({length_new:[False, url]})
                 if not self.group_task:
                     if self.tasks_remaining() < self.max_requests:
-                        self.start(task_dict)
+                        if len(task_dict) > 1:
+                            new_task = {0:task_list}
+                            self.start(new_task)
+                        else:
+                            self.start(task_dict)
                     else:
                         self.task_queue.append(task_list)
                         logger.info('append task')
@@ -263,7 +267,25 @@ class Vinanti:
         self.tasks_timing.update({netloc:time.time()})
         kargs.update({'log':self.log})
         return session, netloc
-        
+    
+    async def __request_preprocess_aio__(self, url, hdrs, method, kargs):
+        n = urlparse(url)
+        netloc = n.netloc
+        old_time = self.tasks_timing.get(netloc)
+        wait_time = kargs.get('wait')
+        session = kargs.get('session')
+        if session:
+            hdrs = self.__update_hdrs__(hdrs, netloc)
+        if old_time and wait_time:
+            time_diff = time.time() - old_time
+            while(time_diff < wait_time):
+                logger.info('waiting in queue..{} for {}s'.format(netloc, wait_time))
+                await asyncio.sleep(wait_time)
+                time_diff = time.time() - self.tasks_timing.get(netloc)
+        self.tasks_timing.update({netloc:time.time()})
+        kargs.update({'log':self.log})
+        return session, netloc
+    
     def __update_session_cookies__(self, req_obj, netloc):
         old_cookie = self.cookie_session.get(netloc)
         new_cookie = req_obj.session_cookies
@@ -300,7 +322,7 @@ class Vinanti:
         if self.backend in ['urllib', 'function']:
             if isinstance(url, str):
                 logger.info('\nRequesting url: {}\n'.format(url))
-                session, netloc = self.__request_preprocess__(url, hdrs, method, kargs)
+                session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
                 future = loop.run_in_executor(self.executor, __get_request__, self.backend, url, hdrs, method, kargs)
             else:
                 future = loop.run_in_executor(self.executor, __complete_function_request__, url, kargs)
@@ -313,7 +335,7 @@ class Vinanti:
                 self.__update_session_cookies__(response, netloc)
                 logger.info('updating response hdr for {}'.format(netloc))
         elif self.backend == 'aiohttp':
-            session, netloc = self.__request_preprocess__(url, hdrs, method, kargs)
+            session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
             req = None
             jar = None
             auth_basic = None
@@ -323,7 +345,7 @@ class Vinanti:
             auth = kargs.get('auth')
             if auth:
                 auth_basic = aiohttp.BasicAuth(auth[0], auth[1])
-            aio = aiohttp.ClientSession(cookie_jar=jar, auth=auth_basic)
+            aio = aiohttp.ClientSession(cookie_jar=jar, auth=auth_basic, loop=loop)
             async with aio:
                 req = await self.fetch_aio(url, aio, hdrs, method, kargs)
             if session and req:
