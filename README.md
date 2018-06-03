@@ -12,7 +12,7 @@ Those who prefer writing synchronous code but need to make asynchronous HTTP req
 
 ### Is there any other advantage?
 
-No. Its only advantage is, easy to use api without knowing anything about async feature of python. Featurewise, it may not be rich compared to other HTTP clients in other areas.
+No. Its only advantage is, easy to use api without knowing anything about async feature of python. Featurewise, it may not be rich compared to other HTTP clients, at the moment, in other areas.
  
 
 ### How async is achieved?
