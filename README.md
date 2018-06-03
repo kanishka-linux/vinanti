@@ -81,7 +81,7 @@ No. Its only advantage is, easy to use api without knowing anything about async 
             
         vnt = Vinanti(block=False)
         
-        vnt.get(url, onfinished=hello, hdrs=hdr)
+        vnt.get(urls, onfinished=hello, hdrs=hdr)
         
         print('Completed')
     
