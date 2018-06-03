@@ -6,7 +6,7 @@ Async non-blocking HTTP library for python with focus on simplicity
 
 Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make asynchronous url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible that doesn't require using any async related keyword at the api-level, and everything about content will be handled by callback function.
 
-### For whom this library can be useful?
+### To whom can this library be useful?
 
 Those who prefer writing synchronous code but need to make asynchronous HTTP requests.
 
@@ -17,9 +17,9 @@ No. Its only advantage is, easy to use api without knowing anything about async 
 
 ### How async is achieved?
 
-1. Using concurrent.futures: This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. Good for small number of async requests.
+1. **Using concurrent.futures:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. Good for small number of async requests.
 
-2. Using aiohttp: Using aiohttp as backend, real async can be achieved. Users need to install aiohttp using command:
+2. **Using aiohttp:** Using aiohttp as backend, real async can be achieved. Users need to install aiohttp using command:
 
         $ (sudo) pip/pip3 install aiohttp
         
