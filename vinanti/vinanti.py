@@ -75,11 +75,14 @@ class Vinanti:
         self.task_queue = deque()
         self.max_requests = max_requests
         self.multiprocess = multiprocess
-        if self.multiprocess:
-            self.executor = ProcessPoolExecutor(max_workers=max_requests)
+        if self.backend == 'urllib':
+            if self.multiprocess:
+                self.executor = ProcessPoolExecutor(max_workers=max_requests)
+            else:
+                self.executor = ThreadPoolExecutor(max_workers=max_requests)
         else:
-            self.executor = ThreadPoolExecutor(max_workers=max_requests)
-        logger.info('multiprocess: {}; max_workers={}'.format(multiprocess, max_requests))
+            self.executor = None
+        logger.info('multiprocess: {}; max_workers={}; backend={}'.format(multiprocess, max_requests, backend))
         
     def clear(self):
         self.tasks.clear()
@@ -133,25 +136,28 @@ class Vinanti:
         else:
             task_dict = {}
             task_list = []
+            more_tasks = OrderedDict()
             if not isinstance(urls, list):
                 urls = [urls]
             for i, url in enumerate(urls):
                 length = len(self.tasks)
                 length_new = len(self.tasks_completed)
                 task_list = [url, onfinished, hdrs, method, options_dict, length_new]
-                task_dict.update({i:task_list})
                 self.tasks.update({length:task_list})
                 self.tasks_completed.update({length_new:[False, url]})
                 if not self.group_task:
                     if self.tasks_remaining() < self.max_requests:
-                        if len(task_dict) > 1:
-                            new_task = {0:task_list}
-                            self.start(new_task)
-                        else:
+                        if len(urls) == 1:
+                            task_dict.update({i:task_list})
                             self.start(task_dict)
+                        else:
+                            more_tasks.update({i:task_list})
                     else:
                         self.task_queue.append(task_list)
                         logger.info('append task')
+            if more_tasks:
+                self.start(more_tasks)
+                logger.info('starting {} extra tasks in list'.format(len(more_tasks)))
     
     def set_session_params(self, method, hdrs, onfinished, options_dict):
         if not method and self.method_global:
@@ -222,6 +228,7 @@ class Vinanti:
         for key, val in tasks_dict.items():
             #url, onfinished, hdrs, method, kargs, length = val
             tasks.append(asyncio.ensure_future(self.__start_fetching__(*val, loop)))
+        logger.debug('starting {} tasks in single loop'.format(len(tasks_dict)))
         loop.run_until_complete(asyncio.gather(*tasks))
         loop.close()
         
