@@ -142,16 +142,16 @@ No. Its only advantage is, easy to use api without knowing anything about async 
         
         1. backend = 'urllib' or 'aiohttp' (default urllib)
         
-        1. group_task = True/False (default False)
+        2. group_task = True/False (default False)
         
-        2. session = True/False (default False) # Maintain session cookies between requests.
+        3. session = True/False (default False) # Maintain session cookies between requests.
                                                 # This option will automatically handle setting
                                                 # and sending of session cookies similar to
                                                 # web browser. Default is False
         
-        3. max_requests = maximum concurrent requests (default 10)
+        4. max_requests = maximum concurrent requests (default 10)
         
-        4. multiprocess = True/False (default False) # This parameter will allow
+        5. multiprocess = True/False (default False) # This parameter will allow
                                                      # using separate process
                                                      # for every request.
                                                      # Useful only when backend='urllib'
