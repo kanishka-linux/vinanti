@@ -48,6 +48,25 @@ class TestVinanti(unittest.TestCase):
         vnt.add('http://httpbin.org/get', method='HEAD', onfinished=namaste)
         vnt.add('http://httpbin.org/ip', method='GET', onfinished=namaste)
         vnt.start()
+    
+    def test_session_aio(self):
+        vnt = Vinanti(block=self.block, method='GET', onfinished=hello, hdrs=self.hdr, group_task=True, backend='aiohttp')
+        vnt.get('http://www.google.com', out='/tmp/1.html')
+        vnt.add('http://www.wikipedia.org', out='/tmp/2.html')
+        vnt.add('http://www.google.com', out='/tmp/3.html')
+        vnt.start()
+
+    def test_session_mix_aio(self):
+        data_dict = {'hello':'world', 'world':'hello'}
+        vnt = Vinanti(block=self.block, onfinished=hello, hdrs=self.hdr, method='POST', data=data_dict, group_task=True, backend='aiohttp')
+        vnt.post('http://www.httpbin.org/post')
+        vnt.add('http://www.httpbin.org/post', data={'clrs':'algo'})
+        vnt.add('http://www.httpbin.org/post', data={'ast':'OS'})
+        vnt.add('http://www.httpbin.org/post', data={'tma':'calc'}, hdrs={'user-agent':'curl'})
+        vnt.add('http://www.httpbin.org/get', method='GET', params={'hp':'ca', 'ahu':'tfcs'})
+        vnt.add('http://httpbin.org/get', method='HEAD', onfinished=namaste)
+        vnt.add('http://httpbin.org/ip', method='GET', onfinished=namaste)
+        vnt.start()
         
 if __name__ == '__main__':
     BASEDIR, BASEFILE = os.path.split(os.path.abspath(__file__))

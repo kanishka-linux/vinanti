@@ -34,6 +34,16 @@ class TestVinanti(unittest.TestCase):
         vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data=data_dict)
         vnt.add('http://httpbin.org/get', method='HEAD', onfinished=hello, hdrs=hdr)
         vnt.start()
+        
+    def test_add_aio(self):
+        vnt = Vinanti(block=False, group_task=True, backend='aiohttp')
+        vnt.get('http://www.google.com',onfinished=hello, hdrs=hdr)
+        vnt.add('http://www.wikipedia.org',onfinished=namaste, hdrs=hdr, charset='utf-8')
+        vnt.add('http://www.duckduckgo.com',onfinished=konichiwa, hdrs=hdr)
+        data_dict = {'Fyodor Dostoyevsky':'Crime and Punishment', 'Shivaji Sawant':'Mrityunjaya'}
+        vnt.add('http://httpbin.org/post', method='POST', onfinished=bonjour, hdrs=hdr, data=data_dict)
+        vnt.add('http://httpbin.org/get', method='HEAD', onfinished=hello, hdrs=hdr)
+        vnt.start()
 
         
 if __name__ == '__main__':

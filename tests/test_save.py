@@ -31,6 +31,12 @@ class TestVinanti(unittest.TestCase):
         vnt.get('http://www.google.com',onfinished=hello, hdrs=self.hdr, out='/tmp/1.html')
         vnt.get('http://www.wikipedia.org',onfinished=hello, hdrs=self.hdr, out='/tmp/2.html')
         vnt.get('http://www.google.com',onfinished=hello, hdrs=self.hdr, out='/tmp/3.html')
+        
+    def test_save_file_aio(self):
+        vnt = Vinanti(block=False, backend='aiohttp')
+        vnt.get('http://www.google.com',onfinished=hello, hdrs=self.hdr, out='/tmp/1_aio.html')
+        vnt.get('http://www.wikipedia.org',onfinished=hello, hdrs=self.hdr, out='/tmp/2_aio.html')
+        vnt.get('http://www.google.com',onfinished=hello, hdrs=self.hdr, out='/tmp/3_aio.html')
 
         
 if __name__ == '__main__':
