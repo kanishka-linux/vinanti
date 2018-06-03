@@ -4,11 +4,34 @@ Async non-blocking HTTP library for python with focus on simplicity
 
 ### Motivation for writing the library
 
-Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make asynchronous url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible (using combination of async/await and concurrent.futures), with everything about content will be handled by callback function.
+Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make asynchronous url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible that doesn't require using any async related keyword at the api-level, and everything about content will be handled by callback function.
+
+### For whom this library can be useful?
+
+Those who prefer writing synchronous code but need to make asynchronous HTTP requests.
+
+### Is there any other advantage?
+
+No. Its only advantage is, easy to use api without knowing anything about async feature of python. Featurewise, it may not be rich compared to other HTTP clients in other areas.
+ 
+
+### How async is achieved?
+
+1. Using concurrent.futures: This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. Good for small number of async requests.
+
+2. Using aiohttp: Using aiohttp as backend, real async can be achieved. Users need to install aiohttp using command:
+
+        $ (sudo) pip/pip3 install aiohttp
+        
+    and then need to setup backend='aiohttp' during initialization of Vinanti.
+    
+### Dependencies
+
+        python 3.5.2+
+        
+        aiohttp (if backend set to aiohttp)
 
 ### Installation
-
-        Requires Python 3.5+, No other dependency
         
 		$ git clone https://github.com/kanishka-linux/vinanti
         
@@ -20,9 +43,9 @@ Async/await is a great feature of python, but at the same time pretty confusing.
         
 		$ (sudo) pip install pkg_available_in_directory (or pip3 install pkg_available_in_directory) 
         
-          where 'pkg_available_in_directory' is the exact name of the package
+          #where 'pkg_available_in_directory' is the exact name of the package
           
-          created in the 'dist' folder
+          #created in the 'dist' folder
           
         
         OR
@@ -31,9 +54,9 @@ Async/await is a great feature of python, but at the same time pretty confusing.
         $ (sudo) pip install git+https://github.com/kanishka-linux/vinanti.git
         
         
-        Note: use 'sudo' depending on whether you want to install package system-wide or not
+**Note:** use 'sudo' depending on whether you want to install package system-wide or not
         
-        Note: use pip or pip3 depending on what is available on your system
+**Note:** use pip or pip3 depending on what is available on your system
 			
 ### Uninstall
 		
@@ -58,8 +81,7 @@ Async/await is a great feature of python, but at the same time pretty confusing.
             
         vnt = Vinanti(block=False)
         
-        for url in urls:
-            vnt.get(url, onfinished=hello, hdrs=hdr)
+        vnt.get(url, onfinished=hello, hdrs=hdr)
         
         print('Completed')
     
@@ -116,6 +138,8 @@ Async/await is a great feature of python, but at the same time pretty confusing.
         
         Some other important parameters which can be passed during initialization:
         
+        1. backend = 'urllib' or 'aiohttp' (default urllib)
+        
         1. group_task = True/False (default False)
         
         2. session = True/False (default False) # Maintain session cookies between requests.
@@ -128,6 +152,7 @@ Async/await is a great feature of python, but at the same time pretty confusing.
         4. multiprocess = True/False (default False) # This parameter will allow
                                                      # using separate process
                                                      # for every request.
+                                                     # Useful only when backend='urllib'
 
 * GET: 
         
@@ -166,7 +191,9 @@ Async/await is a great feature of python, but at the same time pretty confusing.
         * data = {key: value} or ((key, value1), (key, value2)) #use with POST
         
         * wait = In seconds #wait for seconds before making request. This
-                            # parameter works domain wise.
+                            # parameter works domain wise. Applicable from 
+                            # second consecutive
+                            # request to same domain in the same session.
         
         * timeout = In seconds
         
@@ -303,11 +330,14 @@ Async/await is a great feature of python, but at the same time pretty confusing.
            
            If multiprocess is set to True during initialization then this many number
            
-           of processes will be created to manage requests concurrently.
+           of processes will be created to manage requests concurrently for urllib
+           
+           backend.
        
     + **group_task = True/False** (default False)
         
-                vnt = Vinanti(block=False, group_task=True, hdrs=hdr_dict, max_requests=100)
+                vnt = Vinanti(block=False, group_task=True, hdrs=hdr_dict,
+                              max_requests=100, backend='aiohttp')
                 
                 url1 = first_url
                 
@@ -333,7 +363,7 @@ Async/await is a great feature of python, but at the same time pretty confusing.
                         
                 vnt.start() # Process of fetching will start at this point
                 
-        + Use this api depending on need.
+        + Use this api depending on need. Mostly useful, if users want to fire large number of requests.
         
     + **wait = In seconds** (This parameter works only domainwise.)
     
@@ -354,7 +384,7 @@ Async/await is a great feature of python, but at the same time pretty confusing.
 
 ### Some more fun
 
-This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions, which will be executed in async manner. In order to pass functions instead of urls, developers have to use api in following manner
+This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions, which will be executed in the background. In order to pass functions instead of urls, developers have to use api in following manner
         
         def hello_world(*args):
             print("hello world")
@@ -364,7 +394,7 @@ This library has been mainly made for asynchronous http requests, but the same d
         
         vnt = Vinanti(block=False/True, group_task=True) # Other parameters can be passed during initialization
                     
-                                                        but they won't work in the case of functions.
+                                                        # but they won't work in the case of functions.
         
         vnt.function(hello_world, rest parameters to hello_world, onfinished=hello)
         
@@ -397,7 +427,10 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
         method = req.method
         url = req.url
         cookies = req.session_cookies
-        
+
+### Some Performance Issues
+
+In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's default connection pool. In order to use aiohttp's default connection pool, vinanti might have to use async related keywords at api level, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code.
 
 ### Sample applications using Vinanti
 
