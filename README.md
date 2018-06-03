@@ -377,7 +377,7 @@ There are two ways to achieve it in this library.
                     
                     vnt.get(urls) # right way
                     
-                    # Following is an inefficine way to process large number of requests
+                    # Following is an inefficient way to process large number of requests
                     
                     for url in urls: # Inefficient way
                         vnt.get(url) # to fetch resources
