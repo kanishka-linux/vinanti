@@ -365,7 +365,22 @@ No. Its only advantage is, easy to use api without knowing anything about async 
                         
                 vnt.start() # Process of fetching will start at this point
                 
-        + Use this api depending on need. Mostly useful, if users want to fire large number of requests.
+        + Use this api depending on need. It is mostly useful, if users want to fire large number of requests with custom callback and other parameters.
+        
+        + If users don't want to pass different parameters to all requests then do not use group_task and instead simply pass list of urls to request function as given below.
+        
+                eg. vnt = Vinanti(block=False, group_task=False, max_requests=1000,
+                                  backend='aiohttp', --other--params--)
+                
+                    urls = [list of 1000 urls]
+                    
+                    vnt.get(urls) # right way
+                    
+                    # Following is an inefficine way to process large number of requests
+                    
+                    for url in urls: # Inefficient way
+                        vnt.get(url) # to fetch resources
+                    
         
     + **wait = In seconds** (This parameter works only domainwise.)
     
@@ -432,7 +447,7 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
 
 ## Some Performance Issues
 
-In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's default connection pool. In order to use aiohttp's default connection pool, vinanti might have to use async related keywords at api level, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code.
++ In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's default connection pool. In order to use aiohttp's default connection pool, vinanti might have to use async related keywords at api level, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code.
 
 ## Sample applications using Vinanti
 
