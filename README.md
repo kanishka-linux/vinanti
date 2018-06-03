@@ -63,7 +63,7 @@ No. Its only advantage is, easy to use api without knowing anything about async 
 		$ (sudo) pip uninstall vinanti (OR pip3 uninstall vinanti)
 		
 
-### Let's Discuss some code:
+## Let's Discuss some code:
 
         from vinanti import Vinanti
         
@@ -84,6 +84,8 @@ No. Its only advantage is, easy to use api without knowing anything about async 
         vnt.get(urls, onfinished=hello, hdrs=hdr)
         
         print('Completed')
+        
+        #That's it, just good old style nice/clean api
     
 * After running above code, users will find that it will print 'Completed' immediately, and fetching of urls will keep on going in the background asynchronously.
     
@@ -124,7 +126,7 @@ No. Its only advantage is, easy to use api without knowing anything about async 
                 
                 #check header_info for more details
 
-### Sample API Usage
+## Sample API Usage
 
 * Initiliaze: 
         
@@ -382,7 +384,7 @@ No. Its only advantage is, easy to use api without knowing anything about async 
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
-### Some more fun
+## Some more fun
 
 This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions. In order to pass functions instead of urls, developers have to use api in following manner
         
@@ -410,7 +412,7 @@ This library has been mainly made for asynchronous http requests, but the same d
         
         Note: This feature is unstable, use with care
         
-### Finally regular synchronous http requests
+## Finally regular synchronous http requests
 
 Just initialize vinanti with block=True, and perform regular http requests. Sample code is given below. 
 
@@ -428,11 +430,11 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
         url = req.url
         cookies = req.session_cookies
 
-### Some Performance Issues
+## Some Performance Issues
 
 In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's default connection pool. In order to use aiohttp's default connection pool, vinanti might have to use async related keywords at api level, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code.
 
-### Sample applications using Vinanti
+## Sample applications using Vinanti
 
 1. A sample application using Vinati is available [here](https://github.com/kanishka-linux/WebComics). It is PyQt application. In qt based applications, fetching urls on one hand and keeping GUI responsive on the other hand is bit cumbersome. In order to keep qt gui responsive, one needs to spin thread (for fetching urls) and then GUI needs to be updated using signal/slot mechanism. The application tries do similar thing using Vinanti, but without external threads and signal/slot mechanism. It intializes Vinanti with **block=False**, and tries to achieve same thing using callback mechanism.
 
@@ -440,10 +442,10 @@ In order to make api simple, the library has accepted some performance penalty e
 
 2. Vinanti has also been used in [this application](https://github.com/kanishka-linux/kawaii-player), in order to manage session between master and slave in pc-to-pc casting mode. In pc-to-pc casting mode, the master computer can send videos to slave computer for playback, which will be then controlled by master. If username and password has been set for slave, along with cookies, then authentication and cookies are managed by vinanti in non-blocking mode.
 
-### Sample library using Vinanti
+## Sample library using Vinanti
 
 A sample [tvdb-async](https://github.com/kanishka-linux/tvdb-async) library is also available. This library allows fetching of tv series metadata from thetvdb.com in async manner as it is made available.
 
-### About word Vinanti
+## About word Vinanti
 
 It means **Request**, in [Marathi](https://en.wikipedia.org/wiki/Marathi_language).
