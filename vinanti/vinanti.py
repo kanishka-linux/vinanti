@@ -33,10 +33,10 @@ except ImportError:
     pass
 
 try:
-    from vinanti.req import RequestObject
+    from vinanti.req import RequestObject, ResponseObject
     from vinanti.log import log_function
 except ImportError:
-    from req import RequestObject
+    from req import RequestObject, ResponseObject
     from log import log_function
     
 logger = log_function(__name__)
@@ -72,6 +72,7 @@ class Vinanti:
         self.task_counter = 0
         self.lock = Lock()
         self.new_lock = Lock()
+        self.aio_lock = Lock()
         self.task_queue = deque()
         self.max_requests = max_requests
         self.multiprocess = multiprocess
@@ -83,6 +84,7 @@ class Vinanti:
         else:
             self.executor = None
         logger.info('multiprocess: {}; max_workers={}; backend={}'.format(multiprocess, max_requests, backend))
+        self.loop = None
         
     def clear(self):
         self.tasks.clear()
@@ -221,25 +223,25 @@ class Vinanti:
             else:
                 self.task_queue.append(task_list)
                 logger.info('queueing task')
-            
+
     def __start_non_block_loop__(self, tasks_dict, loop):
         asyncio.set_event_loop(loop)
-        tasks = []
         for key, val in tasks_dict.items():
             #url, onfinished, hdrs, method, kargs, length = val
-            tasks.append(asyncio.ensure_future(self.__start_fetching__(*val, loop)))
-        logger.debug('starting {} tasks in single loop'.format(len(tasks_dict)))
-        loop.run_until_complete(asyncio.gather(*tasks))
-        loop.close()
+            asyncio.ensure_future(self.__start_fetching__(*val, loop))
+        loop.run_forever()
         
     def start(self, task_dict=None, queue=False):
         if self.group_task and not queue:
             task_dict = self.tasks
-        if not self.block and task_dict:
-            new_loop = asyncio.new_event_loop()
-            loop_thread = Thread(target=self.__start_non_block_loop__, args=(task_dict, new_loop))
+        if not self.loop and task_dict:
+            self.loop = asyncio.new_event_loop()
+            loop_thread = Thread(target=self.__start_non_block_loop__, args=(task_dict, self.loop))
             self.loop_nonblock_list.append(loop_thread)
             self.loop_nonblock_list[len(self.loop_nonblock_list)-1].start()
+        elif task_dict:
+            for key, val in task_dict.items():
+                self.loop.create_task(self.__start_fetching__(*val, self.loop))
     
     def __update_hdrs__(self, hdrs, netloc):
         if hdrs:
@@ -307,8 +309,9 @@ class Vinanti:
         if cookie:
             self.cookie_session.update({netloc:cookie})
         
-    def finished_task_postprocess(self, session, netloc, onfinished,
-                                  task_num, url, future):
+    def finished_task_postprocess(self, session, netloc,
+                                  onfinished, task_num,
+                                  url, future):
         self.lock.acquire()
         try:
             self.task_counter += 1
@@ -323,19 +326,26 @@ class Vinanti:
             self.__update_session_cookies__(result, netloc)
         onfinished(task_num, url, result)
         
-    async def __start_fetching__(self, url, onfinished, hdrs, method, kargs, task_num, loop):
+    async def __start_fetching__(self, url, onfinished, hdrs,
+                                 method, kargs, task_num, loop):
         session = None
         netloc = None
         if self.backend in ['urllib', 'function']:
             if isinstance(url, str):
                 logger.info('\nRequesting url: {}\n'.format(url))
                 session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
-                future = loop.run_in_executor(self.executor, __get_request__, self.backend, url, hdrs, method, kargs)
+                future = loop.run_in_executor(self.executor, __get_request__,
+                                              self.backend, url, hdrs, method,
+                                              kargs)
             else:
-                future = loop.run_in_executor(self.executor, __complete_function_request__, url, kargs)
+                future = loop.run_in_executor(self.executor,
+                                              __complete_function_request__,
+                                               url, kargs)
             
             if onfinished:
-                future.add_done_callback(partial(self.finished_task_postprocess, session, netloc, onfinished, task_num, url))
+                func = partial(self.finished_task_postprocess, session,
+                               netloc, onfinished, task_num, url)
+                future.add_done_callback(func)
             response = await future
         
             if session and response and not onfinished:
@@ -354,7 +364,11 @@ class Vinanti:
                 auth_basic = aiohttp.BasicAuth(auth[0], auth[1])
             aio = aiohttp.ClientSession(cookie_jar=jar, auth=auth_basic, loop=loop)
             async with aio:
-                req = await self.fetch_aio(url, aio, hdrs, method, kargs)
+                try:
+                    req = await self.fetch_aio(url, aio, hdrs, method, kargs)
+                except Exception as err:
+                    logger.error(err)
+                    req = ResponseObject(backend='aiohttp')
             if session and req:
                 self.__update_session_cookies__(req, netloc)
                 logger.info('updating response hdr for {}'.format(netloc))
@@ -374,6 +388,15 @@ class Vinanti:
             
         if self.backend == 'aiohttp' and onfinished:
             onfinished(task_num, url, req)
+            
+        self.aio_lock.acquire()
+        try:
+            if self.tasks_remaining() == 0:
+                loop.stop()
+                loop = None
+                logger.info('All Tasks Finished: closing loop')
+        finally:
+            self.aio_lock.release()
                 
     async def fetch_aio(self, url, session, hdrs, method, kargs):
         req = RequestObject(url, hdrs, method, kargs)
