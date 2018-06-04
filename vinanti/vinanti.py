@@ -45,8 +45,8 @@ logger = log_function(__name__)
 class Vinanti:
     
     def __init__(self, backend='urllib', block=False, log=False,
-                 group_task=False, max_requests=10, multiprocess=False, 
-                 **kargs):
+                 old_method=False, group_task=False, max_requests=10,
+                 multiprocess=False, **kargs):
         self.backend = backend
         self.block = block
         self.tasks = OrderedDict()
@@ -85,6 +85,7 @@ class Vinanti:
             self.executor = None
         logger.info('multiprocess: {}; max_workers={}; backend={}'.format(multiprocess, max_requests, backend))
         self.loop = None
+        self.old_method = old_method
         
     def clear(self):
         self.tasks.clear()
@@ -114,7 +115,8 @@ class Vinanti:
     def tasks_remaining(self):
         return len(self.tasks_completed) - self.task_counter
         
-    def __build_tasks__(self, urls, method, onfinished=None, hdrs=None, options_dict=None):
+    def __build_tasks__(self, urls, method, onfinished=None,
+                        hdrs=None, options_dict=None):
         self.tasks.clear()
         if options_dict is None:
             options_dict = {}
@@ -223,6 +225,16 @@ class Vinanti:
             else:
                 self.task_queue.append(task_list)
                 logger.info('queueing task')
+                
+    def __start_non_block_loop_old__(self, tasks_dict, loop):
+        asyncio.set_event_loop(loop)
+        tasks = []
+        for key, val in tasks_dict.items():
+            #url, onfinished, hdrs, method, kargs, length = val
+            tasks.append(asyncio.ensure_future(self.__start_fetching__(*val, loop)))
+        logger.debug('starting {} tasks in single loop'.format(len(tasks_dict)))
+        loop.run_until_complete(asyncio.gather(*tasks))
+        loop.close()
 
     def __start_non_block_loop__(self, tasks_dict, loop):
         asyncio.set_event_loop(loop)
@@ -234,9 +246,15 @@ class Vinanti:
     def start(self, task_dict=None, queue=False):
         if self.group_task and not queue:
             task_dict = self.tasks
-        if not self.loop and task_dict:
-            self.loop = asyncio.new_event_loop()
-            loop_thread = Thread(target=self.__start_non_block_loop__, args=(task_dict, self.loop))
+        if (not self.loop and task_dict) or (task_dict and self.old_method):
+            if self.old_method:
+                loop = asyncio.new_event_loop()
+            else:
+                self.loop = asyncio.new_event_loop()
+            if self.old_method:
+                loop_thread = Thread(target=self.__start_non_block_loop_old__, args=(task_dict, loop))
+            else:
+                loop_thread = Thread(target=self.__start_non_block_loop__, args=(task_dict, self.loop))
             self.loop_nonblock_list.append(loop_thread)
             self.loop_nonblock_list[len(self.loop_nonblock_list)-1].start()
         elif task_dict:
@@ -389,14 +407,15 @@ class Vinanti:
         if self.backend == 'aiohttp' and onfinished:
             onfinished(task_num, url, req)
             
-        self.aio_lock.acquire()
-        try:
-            if self.tasks_remaining() == 0:
-                loop.stop()
-                loop = None
-                logger.info('All Tasks Finished: closing loop')
-        finally:
-            self.aio_lock.release()
+        if not self.old_method:
+            self.aio_lock.acquire()
+            try:
+                if self.tasks_remaining() == 0:
+                    loop.stop()
+                    self.loop = None
+                    logger.info('All Tasks Finished: closing loop')
+            finally:
+                self.aio_lock.release()
                 
     async def fetch_aio(self, url, session, hdrs, method, kargs):
         req = RequestObject(url, hdrs, method, kargs)
