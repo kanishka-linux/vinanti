@@ -250,9 +250,13 @@ class RequestObject:
         
 class ResponseObject:
     
-    def __init__(self, parent, req, cj, backend='urllib'):
-        self.method = parent.method
-        self.error = parent.error
+    def __init__(self, parent=None, req=None, cj=None, backend='urllib'):
+        if parent:
+            self.method = parent.method
+            self.error = parent.error
+        else:
+            self.method = None
+            self.error = None
         self.session_cookies = None
         self.charset = None
         self.html = None
@@ -262,7 +266,10 @@ class ResponseObject:
         else:
             self.info = None
             self.status = None
-            self.url = parent.url
+            if parent:
+                self.url = parent.url
+            else:
+                self.url = None
             self.content_type = None
             self.content_encoding = None
             
