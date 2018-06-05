@@ -18,7 +18,7 @@ No. Featurewise, it might not be rich compared to other HTTP clients, at the mom
 
 There are two ways to achieve it in this library.
 
-1. **Using concurrent.futures:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. It can be called pseudo async, mostly good for small number of async requests.
+1. **Using concurrent.futures in combination with async/await:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. It can be called as **pseudo async**, mostly good for small number of async requests.
 
 2. **Using aiohttp:** Using aiohttp as backend, **real async** can be achieved. Users need to install aiohttp using command:
 
