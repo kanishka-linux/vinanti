@@ -410,16 +410,16 @@ This library has been mainly made for asynchronous http requests, but the same d
         def hello(*args):
             print("hello")
         
-        vnt = Vinanti(block=False/True, group_task=True) # Other parameters can be passed during initialization
-                    
-                                                        # but they won't work in the case of functions.
+        vnt = Vinanti(block=False, group_task=True, backend='function')
         
         vnt.function(hello_world, rest parameters to hello_world, onfinished=hello)
         
-        vnt.function_add(hello_world, rest parameters to hello_world, onfinished=hello)
+        for executing function in separate process:
         
-        vnt.start()
+        vnt = Vinanti(block=False, group_task=True, backend='function', multiprocess=True)
         
+        vnt.function(hello_world, rest parameters to hello_world)
+                
         For more details take a look at test_function file in tests folder.
         
         Note: vnt.function and vnt.function_add should not be mixed with http requests session.
