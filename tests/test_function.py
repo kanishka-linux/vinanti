@@ -24,11 +24,23 @@ def hello_world(url):
 class TestVinanti(unittest.TestCase):
     
     def test_function_non_block(self):
-        vnt = Vinanti(block=False, group_task=True)
+        vnt = Vinanti(block=False, group_task=True, backend='function')
         vnt.function(hello_world, 'http://www.yahoo.com', onfinished=partial(hello, 'noblock_function'))
         vnt.function_add(hello_world, 'http://www.google.com', onfinished=partial(konichiwa, 'noblock'))
         vnt.function_add(hello_world, 'http://www.wikipedia.org', onfinished=partial(namaste, 'noblock'))
         vnt.start()
+        
+    def test_function(self):
+        vnt = Vinanti(block=False, group_task=False, backend='function', multiprocess=True, max_requests=5)
+        vnt.function(hello_world, 'http://www.yahoo.com', onfinished=partial(hello, 'test function'))
+        vnt.function(hello_world, 'http://www.google.com', onfinished=partial(konichiwa, 'test function'))
+        vnt.function(hello_world, 'http://www.wikipedia.org', onfinished=partial(namaste, 'test function'))
+    
+    def test_function_without_callback(self):
+        vnt = Vinanti(block=False, group_task=False, backend='function', multiprocess=True, max_requests=5)
+        vnt.function(hello_world, 'http://www.yahoo.com')
+        vnt.function(hello_world, 'http://www.google.com')
+        vnt.function(hello_world, 'http://en.wikipedia.org')
     
 if __name__ == '__main__':
     BASEDIR, BASEFILE = os.path.split(os.path.abspath(__file__))
