@@ -330,19 +330,32 @@ class Vinanti:
     def finished_task_postprocess(self, session, netloc,
                                   onfinished, task_num,
                                   url, future):
-        self.lock.acquire()
-        try:
-            self.task_counter += 1
-        finally:
-            self.lock.release()
-        self.tasks_completed.update({task_num:[True, url]})
-        if future.exception():
-            result = None
+        if self.old_method:
+            self.lock.acquire()
+            try:
+                self.task_counter += 1
+            finally:
+                self.lock.release()
         else:
-            result = future.result()
+            self.task_counter += 1
+        self.tasks_completed.update({task_num:[True, url]})
+        if self.backend == 'aiohttp':
+            result = future
+        else:
+            if future.exception():
+                result = None
+                logger.error(future.exception())
+            else:
+                result = future.result()
         if session and result and netloc:
             self.__update_session_cookies__(result, netloc)
-        onfinished(task_num, url, result)
+        if onfinished:
+            onfinished(task_num, url, result)
+        if not self.old_method:
+            if self.tasks_remaining() == 0:
+                self.loop.stop()
+                self.loop = None
+                logger.info('All Tasks Finished: closing loop')
         
     async def __start_fetching__(self, url, onfinished, hdrs,
                                  method, kargs, task_num, loop):
@@ -360,15 +373,10 @@ class Vinanti:
                                               __complete_function_request__,
                                                url, kargs)
             
-            if onfinished:
-                func = partial(self.finished_task_postprocess, session,
-                               netloc, onfinished, task_num, url)
-                future.add_done_callback(func)
+            func = partial(self.finished_task_postprocess, session,
+                           netloc, onfinished, task_num, url)
+            future.add_done_callback(func)
             response = await future
-        
-            if session and response and not onfinished:
-                self.__update_session_cookies__(response, netloc)
-                logger.info('updating response hdr for {}'.format(netloc))
         elif self.backend == 'aiohttp':
             session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
             req = None
@@ -387,36 +395,19 @@ class Vinanti:
                 except Exception as err:
                     logger.error(err)
                     req = ResponseObject(backend='aiohttp')
-            if session and req:
-                self.__update_session_cookies__(req, netloc)
-                logger.info('updating response hdr for {}'.format(netloc))
-        if not onfinished or self.backend == 'aiohttp':
-            self.new_lock.acquire()
-            try:
-                self.task_counter += 1
-            finally:
-                self.new_lock.release()
-            self.tasks_completed.update({task_num:[True, url]})
+                    req.error = str(err)
             
         if self.task_queue:
             task_list = self.task_queue.popleft()
             task_dict = {'0':task_list}
             self.start(task_dict, True)
             logger.info('starting--queued--task')
+        
+        if self.backend == 'aiohttp':
+            self.loop.call_soon_threadsafe(self.finished_task_postprocess,
+                                           session, netloc, onfinished,
+                                           task_num, url, req)
             
-        if self.backend == 'aiohttp' and onfinished:
-            onfinished(task_num, url, req)
-            
-        if not self.old_method:
-            self.aio_lock.acquire()
-            try:
-                if self.tasks_remaining() == 0:
-                    loop.stop()
-                    self.loop = None
-                    logger.info('All Tasks Finished: closing loop')
-            finally:
-                self.aio_lock.release()
-                
     async def fetch_aio(self, url, session, hdrs, method, kargs):
         req = RequestObject(url, hdrs, method, kargs)
         req_obj = await req.process_aio_request(session)
