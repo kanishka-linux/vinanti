@@ -82,6 +82,7 @@ class Vinanti:
             self.executor = ProcessPoolExecutor(max_workers=max_requests)
         else:
             self.executor = ThreadPoolExecutor(max_workers=max_requests)
+        self.executor_process = None
         logger.info(
             'multiprocess: {}; max_requests={}; backend={}'
             .format(multiprocess, max_requests, backend)
@@ -373,18 +374,31 @@ class Vinanti:
             backend = kargs.get('backend')
             if not backend:
                 backend = self.backend
+            mp = kargs.get('multiprocess')
+            if mp:
+                workers = kargs.get('max_requests')
+                if not workers:
+                    workers = self.max_requests
+                if not self.executor_process:
+                    self.executor_process = ProcessPoolExecutor(max_workers=workers)
+                executor = self.executor_process
+                logger.info('using multiprocess with max_workers={}'
+                            .format(workers))
+            else:
+                executor = self.executor
         else:
             backend = self.backend
+            executor = self.executor
         logger.info('using backend: {} for url : {}'.format(backend, url))
         if backend in ['urllib', 'function']:
             if isinstance(url, str):
                 logger.info('\nRequesting url: {}\n'.format(url))
                 session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
-                future = loop.run_in_executor(self.executor, __get_request__,
+                future = loop.run_in_executor(executor, __get_request__,
                                               backend, url, hdrs, method,
                                               kargs)
             else:
-                future = loop.run_in_executor(self.executor,
+                future = loop.run_in_executor(executor,
                                               __complete_function_request__,
                                                url, kargs)
             response = await future
