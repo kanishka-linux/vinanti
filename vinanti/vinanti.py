@@ -33,10 +33,14 @@ except ImportError:
     pass
 
 try:
-    from vinanti.req import *
+    from vinanti.req import Response
+    from vinanti.req_aio import RequestObjectAiohttp
+    from vinanti.req_urllib import RequestObjectUrllib
     from vinanti.log import log_function
 except ImportError:
-    from req import *
+    from req import Response
+    from req_aio import RequestObjectAiohttp
+    from req_urllib import RequestObjectUrllib
     from log import log_function
     
 logger = log_function(__name__)
@@ -71,18 +75,13 @@ class Vinanti:
         self.cookie_session = {}
         self.task_counter = 0
         self.lock = Lock()
-        self.new_lock = Lock()
-        self.aio_lock = Lock()
         self.task_queue = deque()
         self.max_requests = max_requests
         self.multiprocess = multiprocess
-        if self.backend in ['urllib', 'function']:
-            if self.multiprocess:
-                self.executor = ProcessPoolExecutor(max_workers=max_requests)
-            else:
-                self.executor = ThreadPoolExecutor(max_workers=max_requests)
+        if self.multiprocess:
+            self.executor = ProcessPoolExecutor(max_workers=max_requests)
         else:
-            self.executor = None
+            self.executor = ThreadPoolExecutor(max_workers=max_requests)
         logger.info(
             'multiprocess: {}; max_requests={}; backend={}'
             .format(multiprocess, max_requests, backend)
@@ -126,13 +125,21 @@ class Vinanti:
         if self.session_params:
             global_params = [method, hdrs, onfinished, options_dict]
             method, onfinished, hdrs, options_dict = self.__set_session_params__(*global_params)
+            
+        if isinstance(options_dict, dict):
+            backend = options_dict.get('backend')
+            if not backend:
+                backend = self.backend
+        else:
+            backend = self.backend
+        
         if self.block:
             req = None
             logger.info(urls)
             if isinstance(urls, str):
                 length_new = len(self.tasks_completed)
                 session, netloc = self.__request_preprocess__(urls, hdrs, method, options_dict)
-                req = __get_request__(self.backend, urls, hdrs, method, options_dict)
+                req = __get_request__(backend, urls, hdrs, method, options_dict)
                 if session and req and netloc:
                     self.__update_session_cookies__(req, netloc)
                 self.tasks_completed.update({length_new:[True, urls]})
@@ -242,7 +249,6 @@ class Vinanti:
     def __start_non_block_loop__(self, tasks_dict, loop):
         asyncio.set_event_loop(loop)
         for key, val in tasks_dict.items():
-            #url, onfinished, hdrs, method, kargs, length = val
             asyncio.ensure_future(self.__start_fetching__(*val, loop))
         loop.run_forever()
         
@@ -263,6 +269,7 @@ class Vinanti:
         elif task_dict:
             for key, val in task_dict.items():
                 self.loop.create_task(self.__start_fetching__(*val, self.loop))
+            logger.info('queue = {}'.format(queue))
     
     def __update_hdrs__(self, hdrs, netloc):
         if hdrs:
@@ -332,7 +339,7 @@ class Vinanti:
         
     def __finished_task_postprocess__(self, session, netloc,
                                       onfinished, task_num,
-                                      url, future):
+                                      url, backend, future):
         if self.old_method:
             self.lock.acquire()
             try:
@@ -342,7 +349,7 @@ class Vinanti:
         else:
             self.task_counter += 1
         self.tasks_completed.update({task_num:[True, url]})
-        if self.backend == 'aiohttp':
+        if backend == 'aiohttp':
             result = future
         else:
             if future.exception():
@@ -352,11 +359,12 @@ class Vinanti:
                 result = future.result()
         if session and result and netloc:
             self.__update_session_cookies__(result, netloc)
+        logger.info('\ncompleted: {}\n'.format(self.task_counter))
         if self.task_queue:
             task_list = self.task_queue.popleft()
             task_dict = {'0':task_list}
             self.start(task_dict, True)
-            logger.info('starting--queued--task')
+            logger.info('\nstarting--queued--task\n')
         if onfinished:
             onfinished(task_num, url, result)
         if not self.old_method:
@@ -369,12 +377,19 @@ class Vinanti:
                                  method, kargs, task_num, loop):
         session = None
         netloc = None
-        if self.backend in ['urllib', 'function']:
+        if isinstance(kargs, dict):
+            backend = kargs.get('backend')
+            if not backend:
+                backend = self.backend
+        else:
+            backend = self.backend
+        logger.info('using backend: {} for url : {}'.format(backend, url))
+        if backend in ['urllib', 'function']:
             if isinstance(url, str):
                 logger.info('\nRequesting url: {}\n'.format(url))
                 session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
                 future = loop.run_in_executor(self.executor, __get_request__,
-                                              self.backend, url, hdrs, method,
+                                              backend, url, hdrs, method,
                                               kargs)
             else:
                 future = loop.run_in_executor(self.executor,
@@ -382,10 +397,10 @@ class Vinanti:
                                                url, kargs)
             
             func = partial(self.__finished_task_postprocess__, session,
-                           netloc, onfinished, task_num, url)
+                           netloc, onfinished, task_num, url, backend)
             future.add_done_callback(func)
             response = await future
-        elif self.backend == 'aiohttp':
+        elif backend == 'aiohttp':
             session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
             req = None
             jar = None
@@ -402,12 +417,11 @@ class Vinanti:
                     req = await self.__fetch_aio__(url, aio, hdrs, method, kargs)
                 except Exception as err:
                     logger.error(err)
-                    req = Response()
-                    req.error = str(err)
+                    req = Response(url, error=str(err), method=method)
         
             self.loop.call_soon_threadsafe(self.__finished_task_postprocess__,
                                            session, netloc, onfinished,
-                                           task_num, url, req)
+                                           task_num, url, backend, req)
             
     async def __fetch_aio__(self, url, session, hdrs, method, kargs):
         req = RequestObjectAiohttp(url, hdrs, method, kargs)
