@@ -33,10 +33,10 @@ except ImportError:
     pass
 
 try:
-    from vinanti.req import RequestObject, ResponseObject
+    from vinanti.req import *
     from vinanti.log import log_function
 except ImportError:
-    from req import RequestObject, ResponseObject
+    from req import *
     from log import log_function
     
 logger = log_function(__name__)
@@ -83,7 +83,10 @@ class Vinanti:
                 self.executor = ThreadPoolExecutor(max_workers=max_requests)
         else:
             self.executor = None
-        logger.info('multiprocess: {}; max_workers={}; backend={}'.format(multiprocess, max_requests, backend))
+        logger.info(
+            'multiprocess: {}; max_requests={}; backend={}'
+            .format(multiprocess, max_requests, backend)
+            )
         self.loop = None
         self.old_method = old_method
         
@@ -122,7 +125,7 @@ class Vinanti:
             options_dict = {}
         if self.session_params:
             global_params = [method, hdrs, onfinished, options_dict]
-            method, onfinished, hdrs, options_dict = self.set_session_params(*global_params)
+            method, onfinished, hdrs, options_dict = self.__set_session_params__(*global_params)
         if self.block:
             req = None
             logger.info(urls)
@@ -163,7 +166,7 @@ class Vinanti:
                 self.start(more_tasks)
                 logger.info('starting {} extra tasks in list'.format(len(more_tasks)))
     
-    def set_session_params(self, method, hdrs, onfinished, options_dict):
+    def __set_session_params__(self, method, hdrs, onfinished, options_dict):
         if not method and self.method_global:
             method = self.method_global
         if not hdrs and self.hdrs_global:
@@ -214,7 +217,7 @@ class Vinanti:
     def add(self, urls, onfinished=None, hdrs=None, method=None, **kargs):
         if self.session_params:
             global_params = [method, hdrs, onfinished, kargs]
-            method, onfinished, hdrs, kargs = self.set_session_params(*global_params)
+            method, onfinished, hdrs, kargs = self.__set_session_params__(*global_params)
         if isinstance(urls, str):
             length = len(self.tasks)
             length_new = len(self.tasks_completed)
@@ -327,9 +330,9 @@ class Vinanti:
         if cookie:
             self.cookie_session.update({netloc:cookie})
         
-    def finished_task_postprocess(self, session, netloc,
-                                  onfinished, task_num,
-                                  url, future):
+    def __finished_task_postprocess__(self, session, netloc,
+                                      onfinished, task_num,
+                                      url, future):
         if self.old_method:
             self.lock.acquire()
             try:
@@ -349,6 +352,11 @@ class Vinanti:
                 result = future.result()
         if session and result and netloc:
             self.__update_session_cookies__(result, netloc)
+        if self.task_queue:
+            task_list = self.task_queue.popleft()
+            task_dict = {'0':task_list}
+            self.start(task_dict, True)
+            logger.info('starting--queued--task')
         if onfinished:
             onfinished(task_num, url, result)
         if not self.old_method:
@@ -373,7 +381,7 @@ class Vinanti:
                                               __complete_function_request__,
                                                url, kargs)
             
-            func = partial(self.finished_task_postprocess, session,
+            func = partial(self.__finished_task_postprocess__, session,
                            netloc, onfinished, task_num, url)
             future.add_done_callback(func)
             response = await future
@@ -391,25 +399,18 @@ class Vinanti:
             aio = aiohttp.ClientSession(cookie_jar=jar, auth=auth_basic, loop=loop)
             async with aio:
                 try:
-                    req = await self.fetch_aio(url, aio, hdrs, method, kargs)
+                    req = await self.__fetch_aio__(url, aio, hdrs, method, kargs)
                 except Exception as err:
                     logger.error(err)
-                    req = ResponseObject(backend='aiohttp')
+                    req = Response()
                     req.error = str(err)
-            
-        if self.task_queue:
-            task_list = self.task_queue.popleft()
-            task_dict = {'0':task_list}
-            self.start(task_dict, True)
-            logger.info('starting--queued--task')
         
-        if self.backend == 'aiohttp':
-            self.loop.call_soon_threadsafe(self.finished_task_postprocess,
+            self.loop.call_soon_threadsafe(self.__finished_task_postprocess__,
                                            session, netloc, onfinished,
                                            task_num, url, req)
             
-    async def fetch_aio(self, url, session, hdrs, method, kargs):
-        req = RequestObject(url, hdrs, method, kargs)
+    async def __fetch_aio__(self, url, session, hdrs, method, kargs):
+        req = RequestObjectAiohttp(url, hdrs, method, kargs)
         req_obj = await req.process_aio_request(session)
         return req_obj
             
@@ -422,6 +423,6 @@ def __complete_function_request__(func, kargs):
 def __get_request__(backend, url, hdrs, method, kargs):
     req_obj = None
     if backend == 'urllib':
-        req = RequestObject(url, hdrs, method, kargs)
+        req = RequestObjectUrllib(url, hdrs, method, kargs)
         req_obj = req.process_request()
     return req_obj
