@@ -426,7 +426,7 @@ This library has been mainly made for asynchronous http requests, but the same d
         
         i.e. http request session should be separate from above function session
         
-        Note: This feature is unstable, use with care
+        Note: This feature is unstable and not thread safe, use with care
         
 ## Finally regular synchronous http requests
 
