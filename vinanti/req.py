@@ -38,7 +38,6 @@ except ImportError:
     
 logger = log_function(__name__)
 
-
 class RequestObject:
     
     def __init__(self, url, hdrs, method, kargs):
@@ -95,41 +94,17 @@ class RequestObject:
             for key, value in hdr.items():
                 self.hdrs.update({key:value})
             self.data = data
-        
-    def process_request(self):
-        opener = None
-        cj = None
-        if self.verify is False:
-            opener = self.handle_https_context(opener, False)
-        if self.proxies:
-            opener = self.add_proxy(opener)
-        if self.session:
-            opener, cj = self.enable_cookies(opener)
-            
-        req = urllib.request.Request(self.url, data=self.data,
-                                     headers=self.hdrs,
-                                     method=self.method)
-        if self.auth:
-            opener = self.add_http_auth(self.auth, 'basic', opener)
-        elif self.auth_digest:
-            opener = self.add_http_auth(self.auth_digest, 'digest', opener)
-        try: 
-            if opener:
-                r_open = opener.open(req, timeout=self.timeout)
-            else:
-                r_open = urllib.request.urlopen(req, timeout=self.timeout)
-        except Exception as err:
-            r_open = None
-            self.error = str(err)
-            logger.error(err)
-        ret_obj = ResponseObject(self, r_open, cj)
-        return ret_obj
+
+class RequestObjectAiohttp(RequestObject):
+    
+    def __init__(self, url, hdrs, method, kargs):
+        super().__init__(url, hdrs, method, kargs)
         
     async def process_aio_request(self, session):
         func = self.get_aio_request_func(session)
         ret_obj = None
         async with func as resp:
-            ret_obj = ResponseObject(self, None, None, 'aiohttp')
+            ret_obj = Response()
             ret_obj.info = resp.headers
             text = None
             if self.method != 'HEAD':
@@ -187,6 +162,41 @@ class RequestObject:
         new_func = func(self.url, headers=self.hdrs, timeout=self.timeout,
                         ssl=verify, proxy=http_proxy, data=self.data)
         return new_func
+    
+
+class RequestObjectUrllib(RequestObject):
+    
+    def __init__(self, url, hdrs, method, kargs):
+        super().__init__(url, hdrs, method, kargs)
+        
+    def process_request(self):
+        opener = None
+        cj = None
+        if self.verify is False:
+            opener = self.handle_https_context(opener, False)
+        if self.proxies:
+            opener = self.add_proxy(opener)
+        if self.session:
+            opener, cj = self.enable_cookies(opener)
+            
+        req = urllib.request.Request(self.url, data=self.data,
+                                     headers=self.hdrs,
+                                     method=self.method)
+        if self.auth:
+            opener = self.add_http_auth(self.auth, 'basic', opener)
+        elif self.auth_digest:
+            opener = self.add_http_auth(self.auth_digest, 'digest', opener)
+        try: 
+            if opener:
+                r_open = opener.open(req, timeout=self.timeout)
+            else:
+                r_open = urllib.request.urlopen(req, timeout=self.timeout)
+        except Exception as err:
+            r_open = None
+            self.error = str(err)
+            logger.error(err)
+        ret_obj = ResponseUrllib(self, r_open, cj)
+        return ret_obj
                 
     def add_http_auth(self, auth_tuple, auth_type, opener=None):
         logger.info(auth_type)
@@ -248,31 +258,34 @@ class RequestObject:
             opener = urllib.request.build_opener(proxy_handler)
         return opener
         
-        
-class ResponseObject:
+
+class Response:
     
-    def __init__(self, parent=None, req=None, cj=None, backend='urllib'):
-        if parent:
-            self.method = parent.method
-            self.error = parent.error
-        else:
-            self.method = None
-            self.error = None
+    def __init__(self):
+        self.method = None
+        self.error = None
         self.session_cookies = None
         self.charset = None
         self.html = None
-        if req and backend != 'aiohttp':
+        self.info = None
+        self.status = None
+        self.url = None
+        self.content_type = None
+        self.content_encoding = None
+    
+
+class ResponseUrllib(Response):
+    
+    def __init__(self, parent=None, req=None,
+                 cj=None, backend='urllib'):
+        super().__init__()
+        if parent:
+            self.method = parent.method
+            self.error = parent.error
+            self.url = parent.url
+        if req:
             self.set_information(req, parent)
             self.set_session_cookies(cj)
-        else:
-            self.info = None
-            self.status = None
-            if parent:
-                self.url = parent.url
-            else:
-                self.url = None
-            self.content_type = None
-            self.content_encoding = None
             
     def set_information(self, req, parent):
         self.info = req.info()
