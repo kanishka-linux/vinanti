@@ -140,7 +140,7 @@ class RequestObject:
                             if not chunk:
                                 break
                             fd.write(chunk)
-                        ret_obj.html = 'file saved to {}'.format(self.out)
+                        text = 'file saved to {}'.format(self.out)
                 else:
                     if self.binary:
                         text = await resp.read()
