@@ -339,7 +339,7 @@ class Vinanti:
         
     def __finished_task_postprocess__(self, session, netloc,
                                       onfinished, task_num,
-                                      url, backend, future):
+                                      url, backend, result):
         if self.old_method:
             self.lock.acquire()
             try:
@@ -349,14 +349,6 @@ class Vinanti:
         else:
             self.task_counter += 1
         self.tasks_completed.update({task_num:[True, url]})
-        if backend == 'aiohttp':
-            result = future
-        else:
-            if future.exception():
-                result = None
-                logger.error(future.exception())
-            else:
-                result = future.result()
         if session and result and netloc:
             self.__update_session_cookies__(result, netloc)
         logger.info('\ncompleted: {}\n'.format(self.task_counter))
@@ -395,10 +387,6 @@ class Vinanti:
                 future = loop.run_in_executor(self.executor,
                                               __complete_function_request__,
                                                url, kargs)
-            
-            func = partial(self.__finished_task_postprocess__, session,
-                           netloc, onfinished, task_num, url, backend)
-            future.add_done_callback(func)
             response = await future
         elif backend == 'aiohttp':
             session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
@@ -414,14 +402,14 @@ class Vinanti:
             aio = aiohttp.ClientSession(cookie_jar=jar, auth=auth_basic, loop=loop)
             async with aio:
                 try:
-                    req = await self.__fetch_aio__(url, aio, hdrs, method, kargs)
+                    response = await self.__fetch_aio__(url, aio, hdrs, method, kargs)
                 except Exception as err:
                     logger.error(err)
-                    req = Response(url, error=str(err), method=method)
+                    response = Response(url, error=str(err), method=method)
         
-            self.loop.call_soon_threadsafe(self.__finished_task_postprocess__,
-                                           session, netloc, onfinished,
-                                           task_num, url, backend, req)
+        self.__finished_task_postprocess__(session, netloc, onfinished,
+                                           task_num, url, backend,
+                                           response)
             
     async def __fetch_aio__(self, url, session, hdrs, method, kargs):
         req = RequestObjectAiohttp(url, hdrs, method, kargs)
