@@ -14,9 +14,9 @@ Those who prefer writing synchronous code but need to make asynchronous HTTP req
 
 There are two ways to achieve it in this library.
 
-1. **Using combination of threadpool/processpool executor and async/await:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. It can be called as **pseudo async**, mostly good for small number of async requests.
+1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. It can be called as **pseudo async**, mostly good for small number of async requests.
 
-In this method, asyncio's event loop executes tasks in executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). It also manages schedule of new tasks. As event loop runs only one task at a time, it allows executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
++ In this method, asyncio's event loop executes tasks in executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). It also manages schedule of new tasks. As event loop runs only one task at a time, it allows executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
 
 2. **Using aiohttp:** Using aiohttp as backend, **real async** can be achieved. Users need to install aiohttp using command:
 
