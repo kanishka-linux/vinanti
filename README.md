@@ -12,7 +12,7 @@ Those who prefer writing synchronous code but need to make asynchronous HTTP req
 
 ### How async is achieved?
 
-There are two ways in which async has been achieveed in this library.
+There are two ways, in which async has been achieved in this library.
 
 1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is the default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. One can also call this mode as **pseudo async**.
 
