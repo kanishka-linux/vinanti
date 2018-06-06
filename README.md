@@ -16,7 +16,7 @@ There are two ways, in which async has been achieved in this library.
 
 1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is the default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. One can also call this mode as **pseudo async**.
 
-+ In this mode, asyncio's event loop, which also manages scheduling of tasks, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). The event loop allows running of only one task at a time, which helps in executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
++ In this mode, asyncio's event loop, which also manages scheduling of tasks, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). As event loop allows running of only one task at a time, it also helps in executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
 
 + It is mostly good for small number of async requests.
 
