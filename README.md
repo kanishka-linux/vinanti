@@ -10,21 +10,43 @@ Async/await is a great feature of python, but at the same time pretty confusing.
 
 Those who prefer writing synchronous code but need to make asynchronous HTTP requests.
 
-### Is there any other advantage?
-
-No. Featurewise, it might not be rich compared to other HTTP clients, at the moment. Its only advantage is, easy to use api which doesn't require knowing anything about async feature of python at the user level. Possibly, it will try to add many other features in future. But currently its main focus is to explore/experiment whether it is possible to build api's to async libraries without users having to deal with async related code/syntax themselves at the api-level or not.
-
 ### How async is achieved?
 
 There are two ways to achieve it in this library.
 
-1. **Using concurrent.futures:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. It can be called as **pseudo async**, mostly good for small number of async requests.
+1. **Using combination of threadpool/processpool executor and async/await:** This is default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. It can be called as **pseudo async**, mostly good for small number of async requests.
+
+In this method, asyncio's event loop executes tasks in executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). It also manages schedule of new tasks. As event loop runs only one task at a time, it allows executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
 
 2. **Using aiohttp:** Using aiohttp as backend, **real async** can be achieved. Users need to install aiohttp using command:
 
         $ (sudo) pip/pip3 install aiohttp
         
     and then need to setup backend='aiohttp' during initialization of Vinanti.
+
+### Features
+
+Featurewise, it might not be rich compared to other HTTP clients, at the moment. Its main advantage is, easy to use api which doesn't require knowing anything about async feature of python at the user level. Possibly, it will try to add many other features in future. But currently its main focus is to explore/experiment whether it is possible to build api's to async libraries without users having to deal with async related code/syntax themselves at the api-level or not.
+
+However, Vinanti has some interesting features (apart from regular HTTP requests) which are listed below:
+
++ Allowing both sync/async HTTP requests (default async)
+
++ Ability to add wait duration between successive requests to same domain. i.e Ability to rate limit number of http requests that can be fired at particular domain.
+
++ Ability to fire list of http requests in async, non-blocking manner.
+
+        urls = [list of 1000 urls]
+        
+        vnt.get(urls, onfinished=hello)
+        
++ Ability to use different http library backends. Currently urllib.request and aiohttp are supported.
+
++ Thread safety of callbacks in both the methods.
+
++ Ability to use either threads or process when backend='urllib'
+
++ Ability to limit number of concurrent requests at a time.
     
 ### Dependencies
 
@@ -141,7 +163,7 @@ There are two ways to achieve it in this library.
         
         Some other important parameters which can be passed during initialization:
         
-        1. backend = 'urllib' or 'aiohttp' (default urllib)
+        1. backend = 'urllib' or 'aiohttp' or 'function' (default 'urllib')
         
         2. group_task = True/False (default False)
         
@@ -427,7 +449,9 @@ This library has been mainly made for asynchronous http requests, but the same d
         
         i.e. http request session should be separate from above function session
         
-        Note: This feature is unstable and not thread safe, use with care
+        Note: Executing functins in this way is not thread safe, so use with care.
+        
+              However, callbacks are thread safe.
         
 ## Finally regular synchronous http requests
 
@@ -449,7 +473,7 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
 
 ## Some Performance Issues
 
-+ In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's default connection pool. In order to use aiohttp's default connection pool, vinanti might have to use async related keywords at api level, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code. Apart from this, there are still many corner cases that need improvement/fixes.  
++ In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's connection pool. In order to use aiohttp's default connection pool, vinanti might have to turn entire code into async including its api, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code. Apart from this, there are still many corner cases that need improvement/fixes.  
 
 ## Sample applications using Vinanti
 
