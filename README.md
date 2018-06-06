@@ -410,13 +410,13 @@ This library has been mainly made for asynchronous http requests, but the same d
         def hello(*args):
             print("hello")
         
-        vnt = Vinanti(block=False, group_task=True, backend='function')
+        vnt = Vinanti(block=False, backend='function')
         
         vnt.function(hello_world, rest parameters to hello_world, onfinished=hello)
         
         for executing function in separate process:
         
-        vnt = Vinanti(block=False, group_task=True, backend='function', multiprocess=True)
+        vnt = Vinanti(block=False, backend='function', multiprocess=True)
         
         vnt.function(hello_world, rest parameters to hello_world)
                 
