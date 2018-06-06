@@ -181,9 +181,10 @@ class Vinanti:
             hdrs = self.hdrs_global.copy()
         if not onfinished and self.onfinished_global:
             onfinished = self.onfinished_global
-        for key, value in self.session_params.items():
-            if key not in options_dict and key not in self.global_param_list:
-                options_dict.update({key:value})
+        if isinstance(options_dict, dict):
+            for key, value in self.session_params.items():
+                if key not in options_dict and key not in self.global_param_list:
+                    options_dict.update({key:value})
         return method, onfinished, hdrs, options_dict
     
     def get(self, urls, onfinished=None, hdrs=None, **kargs):
@@ -390,19 +391,15 @@ class Vinanti:
             backend = self.backend
             executor = self.executor
         logger.info('using backend: {} for url : {}'.format(backend, url))
-        if backend in ['urllib', 'function']:
-            if isinstance(url, str):
-                logger.info('\nRequesting url: {}\n'.format(url))
-                session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
-                future = loop.run_in_executor(executor, __get_request__,
-                                              backend, url, hdrs, method,
-                                              kargs)
-            else:
-                future = loop.run_in_executor(executor,
-                                              __complete_function_request__,
-                                               url, kargs)
+        if backend == 'urllib' and isinstance(url, str):
+            logger.info('\nRequesting url: {}\n'.format(url))
+            session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
+            future = loop.run_in_executor(executor, __get_request__,
+                                          backend, url, hdrs, method,
+                                          kargs)
+            
             response = await future
-        elif backend == 'aiohttp':
+        elif backend == 'aiohttp' and isinstance(url, str):
             session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
             req = None
             jar = None
@@ -420,6 +417,11 @@ class Vinanti:
                 except Exception as err:
                     logger.error(err)
                     response = Response(url, error=str(err), method=method)
+        elif backend == 'function' or not isinstance(url, str):
+            future = loop.run_in_executor(executor,
+                                          __complete_function_request__,
+                                          url, kargs)
+            response = await future
         
         self.__finished_task_postprocess__(session, netloc, onfinished,
                                            task_num, url, backend,
