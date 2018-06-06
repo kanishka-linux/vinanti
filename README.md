@@ -4,7 +4,7 @@ Async non-blocking HTTP library for python with focus on simplicity
 
 ### Motivation for writing the library
 
-Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make asynchronous url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible that doesn't require using any async related keyword at the api-level, and everything about content will be handled by callback function.
+Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. Besides, trying to use async functionality in a totally synchronous codebase is a recipe for disaster. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make asynchronous url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible that doesn't require using any async related keyword at the api-level, and everything about content will be handled by callback function.
 
 ### To whom can this library be useful?
 
@@ -26,9 +26,9 @@ There are two ways, in which async has been achieved in this library.
         
     and then need to setup backend='aiohttp' during initialization of Vinanti.
 
-### Features
+## Features
 
-Featurewise, it might not be rich compared to other HTTP clients, at the moment. Its main advantage is, easy to use api which doesn't require knowing anything about async feature of python at the user level. Possibly, it will try to add many other features in future. But currently its main focus is to explore/experiment whether it is possible to build api's to async libraries without users having to deal with async related code/syntax themselves at the api-level or not.
+Featurewise, it is not rich compared to other HTTP clients, at the moment. Its main advantage is, easy to use api which doesn't require knowing anything about async feature of python at the user level. Possibly, it will try to add many other features in future. But currently its main focus is to explore/experiment whether it is possible to build api's to async libraries without users having to deal with async related code/syntax themselves at the api-level or not.
 
 However, Vinanti has some interesting features (apart from regular HTTP requests) which are listed below:
 
@@ -49,6 +49,8 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
 + Ability to use either threads or process when backend='urllib'
 
 + Ability to limit number of concurrent requests at a time.
+
+## Dependencies and Installation
     
 ### Dependencies
 
