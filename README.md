@@ -375,12 +375,13 @@ There are two ways to achieve it in this library.
                 
                     urls = [list of 1000 urls]
                     
-                    vnt.get(urls) # right way
+                    vnt.get(urls) 
                     
-                    # Following is an inefficient way to process large number of requests
+                    # OR
                     
-                    for url in urls: # Inefficient way
-                        vnt.get(url) # to fetch resources
+                    for url in urls:
+                    
+                        vnt.get(url) 
                     
         
     + **wait = In seconds** (This parameter works only domainwise.)
