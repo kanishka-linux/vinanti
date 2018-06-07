@@ -1,3 +1,3 @@
 from vinanti.vinanti import Vinanti
 
-__version__ = '0.2'
+__version__ = '0.3'
