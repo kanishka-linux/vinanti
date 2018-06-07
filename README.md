@@ -8,7 +8,7 @@ Async/await is an amazing feature of python, but at the same time it is pretty c
 
 ### To whom can this library be useful?
 
-Those who prefer writing synchronous code but need to make asynchronous HTTP requests.
++ This library is mainly useful to those who prefer writing synchronous code but are interested in making asynchronous HTTP requests by taking advantage of async/await feature of python. 
 
 ### How async is achieved?
 
