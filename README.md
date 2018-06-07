@@ -16,7 +16,7 @@ There are two ways, in which async has been achieved in this library.
 
 1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is the default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. One can also call this mode as **pseudo async**.
 
-+ In this mode, asyncio's event loop, which also manages scheduling of tasks in this library, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between request objects passed to them. About callbacks, they are executed once a task completes its execution. As asyncio allows running of only one coroutine at a time, it helps in executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
++ In this mode, asyncio's event loop, which also manages scheduling of tasks in this library, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between request objects passed to them. About callbacks, they are executed once a task completes its execution. Callbacks are the main mechanism through which one receives response object in this library. For thread safety of callbacks see section on Performance Issues at the end of README.
 
 + It is mostly good for small number of async requests. It is default mode, but it can be also activated by setting backend='urllib' while making any request.
 
@@ -25,8 +25,7 @@ There are two ways, in which async has been achieved in this library.
         $ (sudo) pip/pip3 install aiohttp
         
     and then need to setup backend='aiohttp' during initialization of Vinanti. By using aiohttp as backend, one can easily fire 1000+ requests without breaking a sweat, and all of them will be handled in one sigle thread. Only make sure to keep some time duration between successive requests to same domain using **wait** parameter, in order to not to abuse any web based service.
-
-+ **Note:** No need to worry about any technical details mentioned above. Users just have to decide backend and then need to know how to use api of Vinanti, along with how to handle response object in callbacks.
+    
 
 ## Features
 
@@ -46,7 +45,7 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         
 + Ability to use different http library backends. Currently urllib.request and aiohttp are supported.
 
-+ Thread safety of callbacks in both the methods.
++ Better thread safety of callbacks in both the methods.
 
 + Ability to use either threads or process when backend='urllib'
 
@@ -356,11 +355,7 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
            
            Users can fire any number of requests, but only 10 requests will be 
            
-           processed at a time. All other requests will be queued. Once total executing
-           
-           requests will fall below 10, the first queued item will be removed from waiting queue
-           
-           and will be added to current executing task list for execution.
+           processed at a time. This parameter is handled by asyncio.Semaphore().
            
            Depending on system specification, users can set this max_requests to 
            
@@ -486,7 +481,17 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
 
 ## Some Performance Issues
 
-+ In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's connection pool. In order to use aiohttp's default connection pool, vinanti might have to turn entire code into async including its api, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code. Apart from this, there are still many corner cases that need improvement/fixes.  
++ **Thread Safety of callbacks** : 
+    
+    1. Do not use two instances of Vinanti in the same application. If you are using two instances, then make sure that they both do not access callbacks with same global/common variable.
+
+    2. As long as you are not accessing same callbacks from different threads (except the main thread in which main application code is running), you don't have to worry about thread safety. But if, you need to access same callbacks from different thread then arrange for callback using following method:
+
+        vnt.loop.call_soon_threadsafe(callback)
+        
+    3. If above points do not apply and your use case is even more complex then it is better to use traditional synchronization primitives like lock or semaphore.
+
++ In order to make api simple, the library has accepted some performance penalty especially using aiohttp as backend. It can't reuse aiohttp's connection pool. In order to use aiohttp's default connection pool, vinanti might have to turn entire code into async including its api, which could have defeated its purpose of simple and easy to api. If anyone has solution to it, then they can sure submit pull request without changing api. However, this performance penalty looks negligible (compared to other sync http clients) when used in synchronous code.
 
 ## Sample applications using Vinanti
 
