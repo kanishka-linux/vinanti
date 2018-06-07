@@ -16,7 +16,7 @@ There are two ways, in which async has been achieved in this library.
 
 1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is the default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. One can also call this mode as **pseudo async**.
 
-+ In this mode, asyncio's event loop, which also manages scheduling of tasks, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between request objects passed to them. About callbacks, they are executed once a task completes its execution. As asyncio allows running of only one coroutine at a time, it helps in executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
++ In this mode, asyncio's event loop, which also manages scheduling of tasks in this library, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between request objects passed to them. About callbacks, they are executed once a task completes its execution. As asyncio allows running of only one coroutine at a time, it helps in executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
 
 + It is mostly good for small number of async requests. It is default mode, but it can be also activated by setting backend='urllib' while making any request.
 
@@ -25,6 +25,8 @@ There are two ways, in which async has been achieved in this library.
         $ (sudo) pip/pip3 install aiohttp
         
     and then need to setup backend='aiohttp' during initialization of Vinanti. By using aiohttp as backend, one can easily fire 1000+ requests without breaking a sweat, and all of them will be handled in one sigle thread. Only make sure to keep some time duration between successive requests to same domain using **wait** parameter, in order to not to abuse any web based service.
+
++ **Note:** No need to worry about any technical details mentioned above. Users just have to decide backend and then need to know how to use api of Vinanti, along with how to handle response object in callbacks.
 
 ## Features
 
@@ -60,22 +62,22 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
 
 ### Installation
         
-		$ git clone https://github.com/kanishka-linux/vinanti
+        $ git clone https://github.com/kanishka-linux/vinanti
         
-		$ cd vinanti
+        $ cd vinanti
         
-		$ python setup.py sdist (or python3 setup.py sdist)
+        $ python setup.py sdist (or python3 setup.py sdist)
         
-		$ cd dist
+        $ cd dist
         
-		$ (sudo) pip install pkg_available_in_directory (or pip3 install pkg_available_in_directory) 
+        $ (sudo) pip install pkg_available_in_directory (or pip3 install pkg_available_in_directory) 
         
-          #where 'pkg_available_in_directory' is the exact name of the package
+          # where 'pkg_available_in_directory' is the exact name of the package
           
-          #created in the 'dist' folder
+          # created in the 'dist' folder
           
         
-        OR
+        # OR
         
         
         $ (sudo) pip install git+https://github.com/kanishka-linux/vinanti.git
@@ -84,11 +86,11 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
 **Note:** use 'sudo' depending on whether you want to install package system-wide or not
         
 **Note:** use pip or pip3 depending on what is available on your system
-			
+
 ### Uninstall
-		
-		$ (sudo) pip uninstall vinanti (OR pip3 uninstall vinanti)
-		
+        
+        $ (sudo) pip uninstall vinanti (OR pip3 uninstall vinanti)
+
 
 ## Let's Discuss some code:
 
@@ -112,7 +114,7 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
         
         print('Completed')
         
-        #That's it, just good old style nice/clean api
+        # That's it, just good old style nice/clean api
     
 * After running above code, users will find that it will print 'Completed' immediately, and fetching of urls will keep on going in the background asynchronously.
     
