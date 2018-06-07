@@ -487,7 +487,7 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
 
     2. As long as you are not accessing same callbacks from different threads (except the main thread in which main application code is running), you don't have to worry about thread safety. But if, you need to access same callbacks from different thread then arrange for callback using following method:
 
-        vnt.loop.call_soon_threadsafe(callback)
+            vnt.loop.call_soon_threadsafe(callback)
         
     3. If above points do not apply and your use case is even more complex then it is better to use traditional synchronization primitives like lock or semaphore.
 
