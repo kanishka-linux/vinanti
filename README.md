@@ -32,7 +32,7 @@ There are two ways, in which async has been achieved in this library.
 
 Featurewise, it is not rich compared to other HTTP clients, at the moment. Its main advantage is, easy to use api which doesn't require knowing anything about async feature of python at the user level. Possibly, it will try to add many other features in future. But currently its main focus is to explore/experiment whether it is possible to build api's to async libraries without users having to deal with async related code/syntax themselves at the api-level or not.
 
-However, Vinanti has some interesting features (apart from regular HTTP requests) which are listed below:
+However, Vinanti has **some interesting features** (apart from regular HTTP requests) which are listed below:
 
 + Allowing both sync/async HTTP requests (default async)
 
@@ -51,6 +51,7 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
 + Ability to use either threads or process when backend='urllib'
 
 + Ability to limit number of concurrent requests at a time.
+
 
 ## Dependencies and Installation
     
