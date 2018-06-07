@@ -16,7 +16,7 @@ There are two ways, in which async has been achieved in this library.
 
 1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is the default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. One can also call this mode as **pseudo async**.
 
-+ In this mode, asyncio's event loop, which also manages scheduling of tasks in this library, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between request objects passed to them. About callbacks, they are executed once a task completes its execution. Callbacks are the main mechanism through which one receives response object in this library. For thread safety of callbacks see section on Performance Issues at the end of README.
++ In this mode, asyncio's event loop, which also manages scheduling of tasks in this library, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between request objects passed to them. About callbacks, they are executed once a task completes its execution. Callbacks are the main mechanism through which one receives response object in this library.
 
 + It is mostly good for small number of async requests. It is default mode, but it can be also activated by setting backend='urllib' while making any request.
 
@@ -355,7 +355,7 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
            
            Users can fire any number of requests, but only 10 requests will be 
            
-           processed at a time. This parameter is handled by asyncio.Semaphore().
+           processed at a time. This parameter is handled using asyncio.Semaphore().
            
            Depending on system specification, users can set this max_requests to 
            
