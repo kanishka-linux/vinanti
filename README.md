@@ -219,7 +219,7 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
         
         * data = {key: value} or ((key, value1), (key, value2)) #use with POST
         
-        * wait = In seconds #wait for seconds before making request. This
+        * wait = In seconds # wait for seconds before making request. This
                             # parameter works domain wise. Applicable from 
                             # second consecutive
                             # request to same domain in the same session.
@@ -238,7 +238,8 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
         
         * auth = ('user', 'passwd') #http basic auth
         
-        * auth_digest = ('user', 'passwd') #http digest auth
+        * auth_digest = ('user', 'passwd') # http digest auth
+                                           # not available for aiohttp
         
         * verify = True/False # If set to False, it will ignore ssl certificate
                               # verification. Useful for self signed certificates.
@@ -246,6 +247,11 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
         * binary = True/False # Get html response body in bytes.
         
         * charset = specify character set encoding 
+        
+        * cookie_unsafe = True/False (default False) # option for aiohttp, in order
+                                                     # to enable cookie processing
+                                                     # for IP addresses.
+
         
         Examples:
         
