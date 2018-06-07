@@ -4,7 +4,7 @@ Async non-blocking HTTP library for python with focus on simplicity
 
 ### Motivation for writing the library
 
-Async/await is a great feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. Besides, trying to use async functionality in a totally synchronous codebase is a recipe for disaster. So, I was thinking of async http request library in which developers don't have to write keywords like async/await, event_loop etc.., if they just want to make asynchronous url requests and **that too in mostly synchronous code**. So accordingly, this library has been designed with as simple api as possible that doesn't require using any async related keyword at the api-level, and everything about content will be handled by callback function.
+Async/await is an amazing feature of python, but at the same time it is pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. Besides, trying to use async functionality in a totally synchronous codebase is a recipe for disaster. So, I was thinking of async http request library in which developers don't have to worry about async/await syntax at the api-level.., if all they want is to make asynchronous url requests and **that too in mostly synchronous code**. In the process of exploring this idea, I ended up writing experimental HTTP client for python (using existing libraries), that doesn't require any knowledge of async/await at the level of api.
 
 ### To whom can this library be useful?
 
@@ -16,15 +16,15 @@ There are two ways, in which async has been achieved in this library.
 
 1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is the default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. One can also call this mode as **pseudo async**.
 
-+ In this mode, asyncio's event loop, which also manages scheduling of tasks, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). As event loop allows running of only one task at a time, it also helps in executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
++ In this mode, asyncio's event loop, which also manages scheduling of tasks, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between objects passed to them. About callbacks, they are executed once a task complete its execution. As asyncio allows running of only one coroutine at a time, it helps in executing callbacks in thread safe manner. Callbacks are the main mechanism through which one receives response object in this library.
 
-+ It is mostly good for small number of async requests.
++ It is mostly good for small number of async requests. It is default mode, but it can be activated by setting backend='urllib' during initialization.
 
 2. **Using aiohttp:** Using aiohttp as backend, **real async** can be achieved. Users need to install aiohttp using command:
 
         $ (sudo) pip/pip3 install aiohttp
         
-    and then need to setup backend='aiohttp' during initialization of Vinanti.
+    and then need to setup backend='aiohttp' during initialization of Vinanti. By using aiohttp as backend, one can easily fire 1000+ requests without breaking a sweat, and all of them will be handled in one sigle thread. Only make sure to keep some time duration between successive requests to same domain using **wait** parameter, in order to not to abuse any web based service.
 
 ## Features
 
@@ -34,7 +34,7 @@ However, Vinanti has some interesting features (apart from regular HTTP requests
 
 + Allowing both sync/async HTTP requests (default async)
 
-+ Ability to add wait duration between successive requests to same domain. i.e Ability to rate limit number of http requests that can be fired at particular domain.
++ Ability to add wait duration between successive requests to same domain, which helps in limiting number of http requests that can be fired at particular domain.
 
 + Ability to fire list of http requests in async, non-blocking manner.
 
