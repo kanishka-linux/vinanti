@@ -457,7 +457,6 @@ This library has been mainly made for asynchronous http requests, but the same d
         
         Note: Executing functins in this way is not thread safe, so use with care.
         
-              However, callbacks are thread safe.
         
 ## Finally regular synchronous http requests
 
