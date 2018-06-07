@@ -50,7 +50,7 @@ class Vinanti:
     
     def __init__(self, backend='urllib', block=False, log=False,
                  old_method=False, group_task=False, max_requests=10,
-                 multiprocess=False, **kargs):
+                 multiprocess=False, loop_forever=False, **kargs):
         self.backend = backend
         self.block = block
         self.tasks = OrderedDict()
@@ -89,6 +89,8 @@ class Vinanti:
             )
         self.loop = None
         self.old_method = old_method
+        self.sem = None
+        self.loop_forever = loop_forever
         
     def clear(self):
         self.tasks.clear()
@@ -101,7 +103,14 @@ class Vinanti:
         self.cookie_session.clear()
         self.task_queue.clear()
         self.task_counter = 0
-    
+        
+    def loop_close(self):
+        if self.loop:
+            self.loop.stop()
+            self.loop = None
+            logger.info('All Tasks Finished: closing loop')
+            self.sem = None
+                
     def session_clear(self, netloc=None):
         if netloc:
             if self.cookie_session.get(netloc):
@@ -240,6 +249,8 @@ class Vinanti:
                 
     def __start_non_block_loop_old__(self, tasks_dict, loop):
         asyncio.set_event_loop(loop)
+        if not self.sem:
+            self.sem = asyncio.Semaphore(self.max_requests, loop=loop)
         tasks = []
         for key, val in tasks_dict.items():
             #url, onfinished, hdrs, method, kargs, length = val
@@ -250,6 +261,8 @@ class Vinanti:
 
     def __start_non_block_loop__(self, tasks_dict, loop):
         asyncio.set_event_loop(loop)
+        if not self.sem:
+            self.sem = asyncio.Semaphore(self.max_requests, loop=loop)
         for key, val in tasks_dict.items():
             asyncio.ensure_future(self.__start_fetching__(*val, loop))
         loop.run_forever()
@@ -341,7 +354,8 @@ class Vinanti:
         
     def __finished_task_postprocess__(self, session, netloc,
                                       onfinished, task_num,
-                                      url, backend, result):
+                                      url, backend, loop,
+                                      result):
         if self.old_method:
             self.lock.acquire()
             try:
@@ -355,77 +369,92 @@ class Vinanti:
             self.__update_session_cookies__(result, netloc)
         logger.info('\ncompleted: {}\n'.format(self.task_counter))
         if self.task_queue:
-            task_list = self.task_queue.popleft()
-            task_dict = {'0':task_list}
-            self.start(task_dict, True)
-            logger.info('\nstarting--queued--task\n')
+            if self.old_method:
+                task_list = self.task_queue.popleft()
+                task_dict = {'0':task_list}
+                self.start(task_dict, True)
+                logger.info('\nstarting--queued--task\n')
+            else:
+                task_count = len(self.task_queue)
+                for task_list in self.task_queue:
+                    self.loop.create_task(self.__start_fetching__(*task_list, self.loop))
+                self.task_queue.clear()
+                logger.info('\nAll remaining {} tasks given to event loop\n'
+                            .format(task_count))
+                logger.info('\nTask Queue now empty\n')
         if onfinished:
+            logger.info('arranging callback, task {} {}'
+                        .format(task_num, url))
             onfinished(task_num, url, result)
+            logger.info('callback completed, task {} {}'
+                        .format(task_num, url))
         if not self.old_method:
-            if self.tasks_remaining() == 0:
+            if self.tasks_remaining() == 0 and not self.loop_forever:
                 self.loop.stop()
                 self.loop = None
+                self.sem = None
                 logger.info('All Tasks Finished: closing loop')
         
     async def __start_fetching__(self, url, onfinished, hdrs,
                                  method, kargs, task_num, loop):
-        session = None
-        netloc = None
-        if isinstance(kargs, dict):
-            backend = kargs.get('backend')
-            if not backend:
-                backend = self.backend
-            mp = kargs.get('multiprocess')
-            if mp:
-                workers = kargs.get('max_requests')
-                if not workers:
-                    workers = self.max_requests
-                if not self.executor_process:
-                    self.executor_process = ProcessPoolExecutor(max_workers=workers)
-                executor = self.executor_process
-                logger.info('using multiprocess with max_workers={}'
-                            .format(workers))
+        async with self.sem:
+            session = None
+            netloc = None
+            if isinstance(kargs, dict):
+                backend = kargs.get('backend')
+                if not backend:
+                    backend = self.backend
+                mp = kargs.get('multiprocess')
+                if mp:
+                    workers = kargs.get('max_requests')
+                    if not workers:
+                        workers = self.max_requests
+                    if not self.executor_process:
+                        self.executor_process = ProcessPoolExecutor(max_workers=workers)
+                    executor = self.executor_process
+                    logger.info('using multiprocess with max_workers={}'
+                                .format(workers))
+                else:
+                    executor = self.executor
             else:
+                backend = self.backend
                 executor = self.executor
-        else:
-            backend = self.backend
-            executor = self.executor
-        logger.info('using backend: {} for url : {}'.format(backend, url))
-        if backend == 'urllib' and isinstance(url, str):
-            logger.info('\nRequesting url: {}\n'.format(url))
-            session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
-            future = loop.run_in_executor(executor, __get_request__,
-                                          backend, url, hdrs, method,
-                                          kargs)
+            logger.info('using backend: {} for url : {}'.format(backend, url))
+            if backend == 'urllib' and isinstance(url, str):
+                logger.info('\nRequesting url: {}\n'.format(url))
+                session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
+                future = loop.run_in_executor(executor, __get_request__,
+                                              backend, url, hdrs, method,
+                                              kargs)
+                
+                response = await future
+            elif backend == 'aiohttp' and isinstance(url, str):
+                session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
+                req = None
+                jar = None
+                auth_basic = None
+                cookie_unsafe = kargs.get('cookie_unsafe')
+                if cookie_unsafe:
+                    jar = aiohttp.CookieJar(unsafe=True)
+                auth = kargs.get('auth')
+                if auth:
+                    auth_basic = aiohttp.BasicAuth(auth[0], auth[1])
+                aio = aiohttp.ClientSession(cookie_jar=jar, auth=auth_basic, loop=loop)
+                async with aio:
+                    try:
+                        response = await self.__fetch_aio__(url, aio, hdrs, method, kargs)
+                    except Exception as err:
+                        logger.error(err)
+                        response = Response(url, error=str(err), method=method)
+            elif backend == 'function' or not isinstance(url, str):
+                future = loop.run_in_executor(executor,
+                                              __complete_function_request__,
+                                              url, kargs)
+                response = await future
             
-            response = await future
-        elif backend == 'aiohttp' and isinstance(url, str):
-            session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
-            req = None
-            jar = None
-            auth_basic = None
-            cookie_unsafe = kargs.get('cookie_unsafe')
-            if cookie_unsafe:
-                jar = aiohttp.CookieJar(unsafe=True)
-            auth = kargs.get('auth')
-            if auth:
-                auth_basic = aiohttp.BasicAuth(auth[0], auth[1])
-            aio = aiohttp.ClientSession(cookie_jar=jar, auth=auth_basic, loop=loop)
-            async with aio:
-                try:
-                    response = await self.__fetch_aio__(url, aio, hdrs, method, kargs)
-                except Exception as err:
-                    logger.error(err)
-                    response = Response(url, error=str(err), method=method)
-        elif backend == 'function' or not isinstance(url, str):
-            future = loop.run_in_executor(executor,
-                                          __complete_function_request__,
-                                          url, kargs)
-            response = await future
-        
-        self.__finished_task_postprocess__(session, netloc, onfinished,
-                                           task_num, url, backend,
-                                           response)
+            self.__finished_task_postprocess__(session, netloc, onfinished,
+                                               task_num, url, backend, loop,
+                                               response)
             
     async def __fetch_aio__(self, url, session, hdrs, method, kargs):
         req = RequestObjectAiohttp(url, hdrs, method, kargs)
