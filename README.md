@@ -45,8 +45,6 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         
 + Ability to use different http library backends. Currently urllib.request and aiohttp are supported.
 
-+ Better thread safety of callbacks in both the methods.
-
 + Ability to use either threads or process when backend='urllib'
 
 + Ability to limit number of concurrent requests at a time.
