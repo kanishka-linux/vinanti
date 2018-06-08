@@ -36,11 +36,13 @@ try:
     from vinanti.req import Response
     from vinanti.req_aio import RequestObjectAiohttp
     from vinanti.req_urllib import RequestObjectUrllib
+    from vinanti.crawl import CrawlObject
     from vinanti.log import log_function
 except ImportError:
     from req import Response
     from req_aio import RequestObjectAiohttp
     from req_urllib import RequestObjectUrllib
+    from crawl import CrawlObject
     from log import log_function
     
 logger = log_function(__name__)
@@ -76,6 +78,7 @@ class Vinanti:
         self.task_counter = 0
         self.lock = Lock()
         self.task_queue = deque()
+        self.crawler_dict = OrderedDict()
         self.max_requests = max_requests
         self.multiprocess = multiprocess
         if self.multiprocess:
@@ -216,6 +219,12 @@ class Vinanti:
         
     def patch(self, urls, onfinished=None, hdrs=None, **kargs):
         return self.__build_tasks__(urls, 'PATCH', onfinished, hdrs, kargs)
+        
+    def crawl(self, urls, onfinished=None, hdrs=None, **kargs):
+        method =kargs.get('method')
+        if not method:
+            method = 'CRAWL'
+        return self.__build_tasks__(urls, method, onfinished, hdrs, kargs)
     
     def function(self, urls, *args, onfinished=None):
         self.__build_tasks__(urls, 'FUNCTION', onfinished, None, args)
@@ -355,6 +364,7 @@ class Vinanti:
     def __finished_task_postprocess__(self, session, netloc,
                                       onfinished, task_num,
                                       url, backend, loop,
+                                      crawl, crawl_object,
                                       result):
         if self.old_method:
             self.lock.acquire()
@@ -388,18 +398,39 @@ class Vinanti:
             onfinished(task_num, url, result)
             logger.info('callback completed, task {} {}'
                         .format(task_num, url))
+        if crawl and crawl_object and result:
+            if not crawl_object.crawl_dict.get(url):
+                crawl_object.crawl_dict.update({url:True})
+                if result and result.url:
+                    if url != result.url:
+                        crawl_object.crawl_dict.update({result.url:True})
+            crawl_object.start_crawling(result, url, session)
         if not self.old_method:
             if self.tasks_remaining() == 0 and not self.loop_forever:
                 self.loop.stop()
                 self.loop = None
                 self.sem = None
                 logger.info('All Tasks Finished: closing loop')
-        
+                    
     async def __start_fetching__(self, url, onfinished, hdrs,
                                  method, kargs, task_num, loop):
         async with self.sem:
             session = None
             netloc = None
+            crawl_object = None
+            crawl = False
+            if method in ['CRAWL', 'CRAWL_CHILDREN']:
+                if method == 'CRAWL':
+                    all_domain = kargs.get('all_domain')
+                    domains_allowed = kargs.get('domains_allowed')
+                    crawl_object = CrawlObject(self, url, onfinished,
+                                               all_domain, domains_allowed)
+                    self.crawler_dict.update({url:crawl_object})
+                else:
+                    crawl_object = kargs.get('crawl_object')
+                crawl = True
+                method = 'GET'
+                
             if isinstance(kargs, dict):
                 backend = kargs.get('backend')
                 if not backend:
@@ -454,7 +485,7 @@ class Vinanti:
             
             self.__finished_task_postprocess__(session, netloc, onfinished,
                                                task_num, url, backend, loop,
-                                               response)
+                                               crawl, crawl_object, response)
             
     async def __fetch_aio__(self, url, session, hdrs, method, kargs):
         req = RequestObjectAiohttp(url, hdrs, method, kargs)
