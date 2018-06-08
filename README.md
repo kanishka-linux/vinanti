@@ -223,7 +223,7 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         
         vnt.crawl(url)
         
-        #(experimental) lighweight and very basic async crawling with url as base url.
+        #(experimental) lightweight and very basic async crawling with url as base url.
         
         #This method accepts following two extra parameters:
             
