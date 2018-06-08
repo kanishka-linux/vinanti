@@ -213,6 +213,30 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         
 * Similar api is for PUT, DELETE, PATCH and OPTIONS
 
+* CRAWL: 
+        
+        vnt = Vinanti(block=False, onfinished=hello, hdrs=header_dict, wait=0.2,
+                      max_requests=5, backend='aiohttp', session=True)
+        
+        vnt.crawl(url)
+        
+        experimental basic async crawling with url as base url.
+        
+        This method accepts following two extra parameters:
+            
+            all_domain = True/False (default False) # No restriction while crawling.
+                                                    # Crawls everything on its way
+                                                    # if sets to True.
+                                                    
+            domains_allowed = Tuple # Domains allowed to crawl.
+                                    # eg ('en.wikipedia.org', 'docs.python.org')
+                                    # If not given, crawling will takes place
+                                    # strictly following path of base url
+        
+        use wait for maintaining duration between requests, 
+        
+        and max_requests for maximum concurrent requests at a time.
+
 * Some other parameters which can be passed to http request functions or can be used during initialization:
         
         * params = {key: value} #use with GET
