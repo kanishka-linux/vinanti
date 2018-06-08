@@ -33,38 +33,53 @@ class RequestObjectAiohttp(RequestObject):
     
     def __init__(self, url, hdrs, method, kargs):
         super().__init__(url, hdrs, method, kargs)
+        self.readable_format = [
+                'text/plain', 'text/html', 'text/css',
+                'text/javascript', 'application/xhtml+xml',
+                'application/xml', 'application/json',
+                'application/javascript', 'application/ecmascript'
+                ]
         
     async def process_aio_request(self, session):
         func = self.get_aio_request_func(session)
         ret_obj = None
         async with func as resp:
-            ret_obj = Response(self.url, method=self.method)
-            ret_obj.info = resp.headers
-            text = None
-            if self.method != 'HEAD':
-                if self.out:
-                    with open(self.out, 'wb') as fd:
-                        while True:
-                            chunk = await resp.content.read(1024)
-                            if not chunk:
-                                break
-                            fd.write(chunk)
-                        text = 'file saved to {}'.format(self.out)
-                elif self.binary:
-                    text = await resp.read()
-                elif self.charset:
-                    text = await resp.text(encoding=self.charset)
-                else:
-                    text = await resp.text(encoding='utf-8')
-            ret_obj.html = text
-            ret_obj.status = resp.status
-            ret_obj.content_type = ret_obj.info.get('content-type')
-            ret_obj.url = str(resp.url)
-            cj_arr = []
-            for c in session.cookie_jar:
-                cj_arr.append('{}={}'.format(c.key, c.value))
-            ret_obj.session_cookies = ';'.join(cj_arr)
-        return ret_obj
+            rsp = Response(self.url, method=self.method)
+            rsp.info = resp.headers
+            rsp.content_type = rsp.info.get('content-type')
+            rsp.status = resp.status
+            if rsp.status == 200:
+                human_readable = False
+                for i in self.readable_format:
+                    if i in rsp.content_type.lower():
+                        human_readable = True
+                        break
+                text = None
+                if self.method != 'HEAD':
+                    if self.out:
+                        with open(self.out, 'wb') as fd:
+                            while True:
+                                chunk = await resp.content.read(1024)
+                                if not chunk:
+                                    break
+                                fd.write(chunk)
+                            text = 'file saved to {}'.format(self.out)
+                    elif self.binary:
+                        text = await resp.read()
+                    elif self.charset and human_readable:
+                        text = await resp.text(encoding=self.charset)
+                    elif human_readable:
+                        text = await resp.text(encoding='utf-8')
+                    else:
+                        text = 'Content {} not human readable.'.format(rsp.content_type)
+                rsp.html = text
+                rsp.status = resp.status
+                rsp.url = str(resp.url)
+                cj_arr = []
+                for c in session.cookie_jar:
+                    cj_arr.append('{}={}'.format(c.key, c.value))
+                rsp.session_cookies = ';'.join(cj_arr)
+        return rsp
         
     def get_aio_request_func(self, session):
         if self.method == 'GET':
