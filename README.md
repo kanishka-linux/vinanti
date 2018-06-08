@@ -49,6 +49,8 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
 
 + Ability to limit number of concurrent requests at a time.
 
++ Lightweight built-in crawler (experimental) {Requires BeautifulSoup}
+
 
 ## Dependencies and Installation
     
@@ -456,7 +458,7 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         
 * Check [tests](https://github.com/kanishka-linux/vinanti/tree/master/tests) folder, to know more about api usage.
 
-## Some more fun
+## Executing Functions in background
 
 This library has been mainly made for asynchronous http requests, but the same design allows executing arbitrary functions asynchronously in the background. Instead of passing urls, users just have to pass functions. In order to pass functions instead of urls, developers have to use api in following manner
         
@@ -478,11 +480,7 @@ This library has been mainly made for asynchronous http requests, but the same d
                 
         For more details take a look at test_function file in tests folder.
         
-        Note: vnt.function and vnt.function_add should not be mixed with http requests session.
-        
-        i.e. http request session should be separate from above function session
-        
-        Note: Executing functins in this way is not thread safe, so use with care.
+        Note: Executing function in this way is not thread safe, so use with care.
         
         
 ## Finally regular synchronous http requests
