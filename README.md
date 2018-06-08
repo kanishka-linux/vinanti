@@ -215,14 +215,17 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
 
 * CRAWL: 
         
+        # Note: This feature requires installation of BeautifulSoup
+        # Install it using command: pip install bs4
+        
         vnt = Vinanti(block=False, onfinished=hello, hdrs=header_dict, wait=0.2,
                       max_requests=5, backend='aiohttp', session=True)
         
         vnt.crawl(url)
         
-        experimental basic async crawling with url as base url.
+        #(experimental) lighweight and very basic async crawling with url as base url.
         
-        This method accepts following two extra parameters:
+        #This method accepts following two extra parameters:
             
             all_domain = True/False (default False) # No restriction while crawling.
                                                     # Crawls everything on its way
@@ -233,9 +236,9 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
                                     # If not given, crawling will takes place
                                     # strictly following path of base url
         
-        use wait for maintaining duration between requests, 
+        #use wait for maintaining duration between requests to same domain, 
         
-        and max_requests for maximum concurrent requests at a time.
+        #and max_requests for maximum concurrent requests at a time.
 
 * Some other parameters which can be passed to http request functions or can be used during initialization:
         
