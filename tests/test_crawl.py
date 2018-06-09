@@ -9,12 +9,9 @@ hdr = {"User-Agent":"Mozilla/5.0"}
 
 def hello(*args):
     vnt = args[0]
-    print('hello: {} {}'.format(args[1], args[2]))
+    print('{}: {} {}'.format(args[1], args[2], args[3]))
     print(vnt.tasks_count(), vnt.tasks_done(), vnt.tasks_remaining())
-
-def hello_world(*args):
-    vnt = args[0]
-    print('hello_world: {} {}'.format(args[0], args[1]))
+    
 
 class TestVinanti(unittest.TestCase):
     
@@ -22,14 +19,25 @@ class TestVinanti(unittest.TestCase):
         vnt = Vinanti(block=False, backend='aiohttp', max_requests=10,
                       hdrs=hdr, session=True, loop_forever=False, wait=0.2)
         url = 'https://docs.python.org/3/reference/index.html'
-        vnt.crawl(url, onfinished=partial(hello, vnt))
+        vnt.crawl(url, onfinished=partial(hello, vnt, 'test_crawl_aio'))
     
     def test_crawl_urllib(self):
         vnt = Vinanti(block=False, backend='urllib', max_requests=5,
-                      hdrs=hdr, session=True, onfinished=hello_world,
-                      loop_forever=False, wait=0.2)
+                      hdrs=hdr, session=True, loop_forever=False, wait=0.2)
         url = 'https://docs.python.org/3/reference/index.html'
-        vnt.crawl(url)
+        vnt.crawl(url, onfinished=partial(hello, vnt, 'test_crawl_urllib'))
+        
+    def test_crawl_limit(self):
+        vnt = Vinanti(block=False, backend='aiohttp', max_requests=5,
+                      hdrs=hdr, session=True, loop_forever=False, wait=0.2)
+        url = 'https://docs.python.org/3/'
+        vnt.crawl(url, depth_allowed=1, onfinished=partial(hello, vnt, 'test_crawl_limit_aio'))
+    
+    def test_crawl_limit_urllib(self):
+        vnt = Vinanti(block=False, backend='urllib', max_requests=5,
+                      hdrs=hdr, session=True, loop_forever=False, wait=0.2)
+        url = 'https://docs.python.org/3/'
+        vnt.crawl(url, depth_allowed=1, onfinished=partial(hello, vnt, 'test_crawl_limit_urllib'))
     
 if __name__ == '__main__':
     BASEDIR, BASEFILE = os.path.split(os.path.abspath(__file__))
