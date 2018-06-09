@@ -37,12 +37,14 @@ try:
     from vinanti.req_aio import RequestObjectAiohttp
     from vinanti.req_urllib import RequestObjectUrllib
     from vinanti.crawl import CrawlObject
+    from vinanti.utils import *
     from vinanti.log import log_function
 except ImportError:
     from req import Response
     from req_aio import RequestObjectAiohttp
     from req_urllib import RequestObjectUrllib
     from crawl import CrawlObject
+    from utils import *
     from log import log_function
     
 logger = log_function(__name__)
@@ -152,7 +154,7 @@ class Vinanti:
             if isinstance(urls, str):
                 length_new = len(self.tasks_completed)
                 session, netloc = self.__request_preprocess__(urls, hdrs, method, options_dict)
-                req = __get_request__(backend, urls, hdrs, method, options_dict)
+                req = get_request(backend, urls, hdrs, method, options_dict)
                 if session and req and netloc:
                     self.__update_session_cookies__(req, netloc)
                 self.tasks_completed.update({length_new:[True, urls]})
@@ -224,7 +226,15 @@ class Vinanti:
         method =kargs.get('method')
         if not method:
             method = 'CRAWL'
-        return self.__build_tasks__(urls, method, onfinished, hdrs, kargs)
+        url_obj = []
+        depth = kargs.get('depth')
+        if not isinstance(depth, int):
+            depth = 0
+        if isinstance(urls, list):
+            url_obj = [URL(i, depth) for i in urls]
+        else:
+            url_obj.append(URL(urls, depth))
+        return self.__build_tasks__(url_obj, method, onfinished, hdrs, kargs)
     
     def function(self, urls, *args, onfinished=None):
         self.__build_tasks__(urls, 'FUNCTION', onfinished, None, args)
@@ -365,7 +375,7 @@ class Vinanti:
                                       onfinished, task_num,
                                       url, backend, loop,
                                       crawl, crawl_object,
-                                      result):
+                                      url_obj, result):
         if self.old_method:
             self.lock.acquire()
             try:
@@ -404,7 +414,7 @@ class Vinanti:
                 if result and result.url:
                     if url != result.url:
                         crawl_object.crawl_dict.update({result.url:True})
-            crawl_object.start_crawling(result, url, session)
+            crawl_object.start_crawling(result, url_obj, session)
         if not self.old_method:
             if self.tasks_remaining() == 0 and not self.loop_forever:
                 self.loop.stop()
@@ -412,9 +422,14 @@ class Vinanti:
                 self.sem = None
                 logger.info('All Tasks Finished: closing loop')
                     
-    async def __start_fetching__(self, url, onfinished, hdrs,
+    async def __start_fetching__(self, url_obj, onfinished, hdrs,
                                  method, kargs, task_num, loop):
         async with self.sem:
+            
+            if isinstance(url_obj, URL):
+                url = url_obj.url
+            else:
+                url = url_obj
             session = None
             netloc = None
             crawl_object = None
@@ -423,9 +438,11 @@ class Vinanti:
                 if method == 'CRAWL':
                     all_domain = kargs.get('all_domain')
                     domains_allowed = kargs.get('domains_allowed')
-                    crawl_object = CrawlObject(self, url, onfinished,
-                                               all_domain, domains_allowed)
-                    self.crawler_dict.update({url:crawl_object})
+                    depth_allowed = kargs.get('depth_allowed')
+                    crawl_object = CrawlObject(self, url_obj, onfinished,
+                                               all_domain, domains_allowed,
+                                               depth_allowed)
+                    self.crawler_dict.update({url_obj:crawl_object})
                 else:
                     crawl_object = kargs.get('crawl_object')
                 crawl = True
@@ -454,7 +471,7 @@ class Vinanti:
             if backend == 'urllib' and isinstance(url, str):
                 logger.info('\nRequesting url: {}\n'.format(url))
                 session, netloc = await self.__request_preprocess_aio__(url, hdrs, method, kargs)
-                future = loop.run_in_executor(executor, __get_request__,
+                future = loop.run_in_executor(executor, get_request,
                                               backend, url, hdrs, method,
                                               kargs)
                 
@@ -479,28 +496,17 @@ class Vinanti:
                         response = Response(url, error=str(err), method=method)
             elif backend == 'function' or not isinstance(url, str):
                 future = loop.run_in_executor(executor,
-                                              __complete_function_request__,
+                                              complete_function_request,
                                               url, kargs)
                 response = await future
             
             self.__finished_task_postprocess__(session, netloc, onfinished,
                                                task_num, url, backend, loop,
-                                               crawl, crawl_object, response)
+                                               crawl, crawl_object, url_obj,
+                                               response)
             
     async def __fetch_aio__(self, url, session, hdrs, method, kargs):
         req = RequestObjectAiohttp(url, hdrs, method, kargs)
         req_obj = await req.process_aio_request(session)
         return req_obj
-            
-            
-def __complete_function_request__(func, kargs):
-    req_obj = func(*kargs)
-    return req_obj
-
-
-def __get_request__(backend, url, hdrs, method, kargs):
-    req_obj = None
-    if backend == 'urllib':
-        req = RequestObjectUrllib(url, hdrs, method, kargs)
-        req_obj = req.process_request()
-    return req_obj
+        
