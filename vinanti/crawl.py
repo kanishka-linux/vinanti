@@ -61,7 +61,7 @@ class CrawlObject:
             base_url = base_url + '/'
             
         if result and result.html:
-            soup = BeautifulSoup(result.html, 'lxml')
+            soup = BeautifulSoup(result.html, 'html.parser')
             link_list = [soup.find_all('a'), soup.find_all('link')]
             for links in link_list:
                 for link in links:
@@ -99,7 +99,7 @@ class CrawlObject:
             lnk = scheme + ':' + lnk
         elif lnk and lnk.startswith('/'):
             lnk = lnk[1:]
-            lnk = scheme+ '/' + netloc + '/' + lnk
+            lnk = scheme+ '://' + netloc + '/' + lnk
         elif lnk and lnk.startswith('./'):
             lnk = lnk[2:]
             lnk = base_url + lnk
