@@ -233,14 +233,16 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         
         #This method accepts following two extra parameters:
             
-            all_domain = True/False (default False) # No restriction while crawling.
-                                                    # Crawls everything on its way
+            all_domain = True/False (default False) # Crawls everything on its way
                                                     # if sets to True.
                                                     
             domains_allowed = Tuple # Domains allowed to crawl.
                                     # eg ('en.wikipedia.org', 'docs.python.org')
                                     # If not given, crawling will takes place
                                     # strictly following path of base url
+                                    
+            depth_allowed = int # Maximum depth allowed when crawling
+                                # default 0, means no limit
         
         #use wait for maintaining duration between requests to same domain, 
         
