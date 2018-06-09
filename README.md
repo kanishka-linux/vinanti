@@ -61,6 +61,8 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         python 3.5.2+
         
         aiohttp (if backend set to aiohttp)
+        
+        bs4 (BeautifulSoup, if async crawling support is required.)
 
 ### Installation
         
