@@ -4,7 +4,7 @@ Async non-blocking HTTP library for python with focus on simplicity
 
 ### Motivation for writing the library
 
-Async/await is an amazing feature of python, but at the same time it is pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. Besides, trying to use async functionality in a totally synchronous codebase is a recipe for disaster. So, I was thinking of async http request library in which developers don't have to worry about async/await syntax at the api-level.. In the process of exploring this idea, I ended up writing experimental async HTTP client for python (using existing libraries), that doesn't require any knowledge of async/await or even anything related to starting/stopping of event loop at the level of api.
+Async/await is an amazing feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. Besides, trying to use async functionality in a totally synchronous codebase is a recipe for disaster. So, I was thinking of async http request library in which users don't have to worry about async/await syntax.. In the process of exploring this idea, I ended up writing HTTP client (using existing libraries), that doesn't require any knowledge of async functionality at the level of api.
 
 ### To whom can this library be useful?
 
