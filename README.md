@@ -51,6 +51,8 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
 
 + Lightweight built-in crawler (experimental) {Requires BeautifulSoup}
 
+        vnt.crawl(base_url)
+
 
 ## Dependencies and Installation
     
