@@ -243,6 +243,8 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         #use wait for maintaining duration between requests to same domain, 
         
         #and max_requests for maximum concurrent requests at a time.
+        
+        #take a look at test_crawl.py file in tests directory
 
 * Some other parameters which can be passed to http request functions or can be used during initialization:
         
