@@ -8,15 +8,20 @@ except ImportError:
     pass
 
 try:
+    from vinanti.utils import URL
     from vinanti.log import log_function
 except ImportError:
+    from utils import URL
     from log import log_function
     
 logger = log_function(__name__)
 
 class CrawlObject:
     
-    def __init__(self, vnt, url, onfinished, all_domain, domains_allowed):
+    def __init__(self, vnt, url_obj, onfinished, all_domain,
+                 domains_allowed, depth_allowed):
+        url = url_obj.url
+        self.url_obj = url_obj
         ourl = urllib.parse.urlparse(url)
         self.scheme = ourl.scheme
         self.netloc = ourl.netloc
@@ -43,8 +48,14 @@ class CrawlObject:
                 self.domains_allowed = (self.netloc, *dms, )
         else:
             self.domains_allowed = (self.netloc,)
+        if isinstance(depth_allowed, int) and depth_allowed > 0:
+            self.depth_allowed = depth_allowed
+        else:
+            self.depth_allowed = 0
         
-    def start_crawling(self, result, url, session):
+    def start_crawling(self, result, url_obj, session):
+        depth = url_obj.depth
+        url = url_obj.url
         if '#' in url:
             pre, ext = url.rsplit('#', 1)
             if '/' not in ext and pre:
@@ -62,18 +73,21 @@ class CrawlObject:
             
         if result and result.html:
             soup = BeautifulSoup(result.html, 'html.parser')
-            link_list = [soup.find_all('a'), soup.find_all('link')]
-            for links in link_list:
-                for link in links:
-                    lnk = link.get('href')
-                    if not lnk or lnk == '#':
-                        continue
-                    lnk = self.construct_link(ourl, scheme, netloc,
-                                              url, base_url, lnk)
-                    if lnk:
-                        self.crawl_next_link(lnk, session, base_url)
+            if soup.title:
+                url_obj.title = soup.title
+            if self.depth_allowed > depth or self.depth_allowed <= 0:
+                link_list = [soup.find_all('a'), soup.find_all('link')]
+                for links in link_list:
+                    for link in links:
+                        lnk = link.get('href')
+                        if not lnk or lnk == '#':
+                            continue
+                        lnk = self.construct_link(ourl, scheme, netloc,
+                                                  url, base_url, lnk)
+                        if lnk:
+                            self.crawl_next_link(lnk, session, base_url, depth)
                     
-    def crawl_next_link(self, lnk, session, base_url):
+    def crawl_next_link(self, lnk, session, base_url, depth):
         n = urllib.parse.urlparse(lnk)
         crawl_allow = False
         if len(self.domains_allowed) > 1:
@@ -83,7 +97,7 @@ class CrawlObject:
         if not self.crawl_dict.get(lnk) and lnk not in self.link_set:
             self.link_set.add(lnk)
             if lnk.startswith(base_url) or self.all_domain or crawl_allow:
-                self.vnt.crawl(lnk, session=session,
+                self.vnt.crawl(lnk, depth=depth+1, session=session,
                                method='CRAWL_CHILDREN',
                                crawl_object=self,
                                onfinished=self.onfinished)
