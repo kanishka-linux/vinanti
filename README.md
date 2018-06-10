@@ -1,39 +1,11 @@
 # Vinanti
 
 Async non-blocking HTTP library for python with focus on simplicity
-
-### Motivation for writing the library
-
-Async/await is an amazing feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. Besides, trying to use async feature in a totally synchronous codebase is a recipe for disaster. So, for quite some time, I was thinking of async http request library in which users don't have to worry about async/await syntax.. In the process of exploring this idea, I ended up writing async HTTP client (using existing libraries), that doesn't require any knowledge of async functionality of python at the level of api.
-
-### To whom can this library be useful?
-
-+ This library is mainly useful to those who prefer writing synchronous code but are interested in making asynchronous HTTP requests by taking advantage of async/await feature of python. 
-
-### How async is achieved?
-
-There are two ways, in which async has been achieved in this library.
-
-1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is the default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. One can also call this mode as **pseudo async**.
-
-+ In this mode, asyncio's event loop, which also manages scheduling of tasks in this library, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between request objects passed to them. About callbacks, they are executed once a task completes its execution. Callbacks are the main mechanism through which one receives response object in this library.
-
-+ It is mostly good for small number of async requests. It is default mode, but it can be also activated by setting backend='urllib' while making any request.
-
-2. **Using aiohttp:** Using aiohttp as backend, **real async** can be achieved. Users need to install aiohttp using command:
-
-        $ (sudo) pip/pip3 install aiohttp
-        
-    and then need to setup backend='aiohttp' during initialization of Vinanti. By using aiohttp as backend, one can easily fire 1000+ requests without breaking a sweat, and all of them will be handled in one sigle thread. Only make sure to keep some time duration between successive requests to same domain using **wait** parameter, in order to not to abuse any web based service.
     
-
+    
 ## Features
 
-Featurewise, it is not rich compared to other HTTP clients, at the moment. Its main advantage is, easy to use api which doesn't require knowing anything about async feature of python at the user level. Possibly, it will try to add many other features in future. But currently its main focus is to explore/experiment whether it is possible to build api's to async libraries without users having to deal with async related code/syntax themselves at the api-level or not.
-
-However, Vinanti has **some interesting features** (apart from regular HTTP requests) which are listed below:
-
-+ Allowing both sync/async HTTP requests (default async)
++ Allowing both sync/async regular HTTP requests (default async)
 
 + Ability to add wait duration between successive requests to same domain, which helps in limiting number of http requests that can be fired at particular domain.
 
@@ -43,9 +15,9 @@ However, Vinanti has **some interesting features** (apart from regular HTTP requ
         
         vnt.get(urls, onfinished=hello)
         
-+ Ability to use different http library backends. Currently urllib.request and aiohttp are supported.
++ Ability to use different http library backends. Currently **urllib.request** and **aiohttp** are supported.
 
-+ Ability to use either threads or process when backend='urllib'
++ Ability to use either threads or process when backend='urllib'.
 
 + Ability to limit number of concurrent requests at a time.
 
@@ -532,6 +504,30 @@ Just initialize vinanti with block=True, and perform regular http requests. Samp
 ## Sample library using Vinanti
 
 A sample [tvdb-async](https://github.com/kanishka-linux/tvdb-async) library is also available. This library allows fetching of tv series metadata from thetvdb.com in async manner as it is made available.
+
+## Motivation for writing the library
+
+Async/await is an amazing feature of python, but at the same time pretty confusing. Sprinkling async/await keywords all over code just for making simple url requests seems too much, and can make the code difficult to understand at times. Besides, trying to use async feature in a totally synchronous codebase is a recipe for disaster. So, for quite some time, I was thinking of async http request library in which users don't have to worry about async/await syntax.. In the process of exploring this idea, I ended up writing async HTTP client (using existing libraries), that doesn't require any knowledge of async functionality of python at the level of api.
+
+### To whom can this library be useful?
+
++ This library is mainly useful to those who prefer writing synchronous code but are interested in making asynchronous HTTP requests by taking advantage of async/await feature of python. 
+
+### How async is achieved?
+
+There are two ways, in which async has been achieved in this library.
+
+1. **Using combination of ThreadPool/ProcessPool executor and async/await:** This is the default mode and doesn't require any dependency. Concurrency can be achieved using both threads or processes. It uses python's default urllib.request module for fetching web resources. One can also call this mode as **pseudo async**.
+
++ In this mode, asyncio's event loop, which also manages scheduling of tasks in this library, executes tasks in the executor [in background](https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.AbstractEventLoop.run_in_executor). Tasks executed in the executor are not thread safe, therefore care has been taken for maintaining complete separation between request objects passed to them. About callbacks, they are executed once a task completes its execution. Callbacks are the main mechanism through which one receives response object in this library.
+
++ It is mostly good for small number of async requests. It is default mode, but it can be also activated by setting backend='urllib' while making any request.
+
+2. **Using aiohttp:** Using aiohttp as backend, **real async** can be achieved. Users need to install aiohttp using command:
+
+        $ (sudo) pip/pip3 install aiohttp
+        
+    and then need to setup backend='aiohttp' during initialization of Vinanti. By using aiohttp as backend, one can easily fire 1000+ requests without breaking a sweat, and all of them will be handled in one sigle thread. Only make sure to keep some time duration between successive requests to same domain using **wait** parameter, in order to not to abuse any web based service.
 
 ## About word Vinanti
 
