@@ -3,7 +3,7 @@
 Async non-blocking HTTP library for python with focus on simplicity
     
     
-## Features
+## Special Features
 
 + Allowing both sync/async regular HTTP requests (default async)
 
