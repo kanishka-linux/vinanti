@@ -283,6 +283,8 @@ There are two ways, in which async has been achieved in this library.
         * cookie_unsafe = True/False (default False) # option for aiohttp, in order
                                                      # to enable cookie processing
                                                      # for IP addresses.
+                                                     
+        * continue_out = True/False (default Fault) # resuming downloads option
 
         
         Examples:
