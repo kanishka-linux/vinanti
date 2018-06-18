@@ -30,7 +30,7 @@ logger = log_function(__name__)
 
 class RequestObject:
     
-    def __init__(self, url, hdrs, method, kargs):
+    def __init__(self, url, hdrs, method, backend, kargs):
         self.url = url
         self.hdrs = hdrs
         self.kargs = kargs
@@ -40,6 +40,7 @@ class RequestObject:
         self.method = method
         self.error = None
         self.data = None
+        self.backend = backend
         self.log = kargs.get('log')
         self.wait = kargs.get('wait')
         self.proxies = kargs.get('proxies')
@@ -78,14 +79,15 @@ class RequestObject:
             self.data = self.kargs.get('data')
             if self.data:
                 self.data_old = self.data
-                self.data = urllib.parse.urlencode(self.data)
-                self.data = self.data.encode('utf-8')
+                if self.backend == 'urllib':
+                    self.data = urllib.parse.urlencode(self.data)
+                    self.data = self.data.encode('utf-8')
         elif self.method == 'GET':
             payload = self.kargs.get('params')
             if payload:
                 payload = urllib.parse.urlencode(payload)
                 self.url = self.url + '?' + payload
-        if self.files:
+        if self.files and self.backend == 'urllib':
             if self.data:
                 mfiles = Formdata(self.data_old, self.files)
             else:
@@ -94,7 +96,7 @@ class RequestObject:
             for key, value in hdr.items():
                 self.hdrs.update({key:value})
             self.data = data
-        
+                                   
 
 class Response:
     
