@@ -40,7 +40,7 @@ logger = log_function(__name__)
 class RequestObjectUrllib(RequestObject):
     
     def __init__(self, url, hdrs, method, kargs):
-        super().__init__(url, hdrs, method, kargs)
+        super().__init__(url, hdrs, method, 'urllib', kargs)
         
     def process_request(self):
         opener = None
