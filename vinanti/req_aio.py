@@ -49,7 +49,8 @@ class RequestObjectAiohttp(RequestObject):
         func = self.get_aio_request_func(session)
         ret_obj = None
         async with func as resp:
-            rsp = Response(self.url, method=self.method)
+            rsp = Response(self.url, method=self.method,
+                           out_file=self.out, out_dir=self.out_dir)
             rsp.info = resp.headers
             rsp.content_type = rsp.info.get('content-type')
             sz = rsp.info.get('content-length')
@@ -88,7 +89,9 @@ class RequestObjectAiohttp(RequestObject):
                             sys.stdout.write('\r')
                             sys.stdout.write('{} M / {} M : {}'.format(sz, sz, self.out))
                             sys.stdout.flush()
-                            text = 'file saved to {}'.format(self.out)
+                            text = 'file saved to:: {}'.format(self.out)
+                            if not human_readable:
+                                rsp.binary = True
                     elif self.binary:
                         text = await resp.read()
                     elif self.charset and human_readable:
