@@ -55,6 +55,7 @@ class RequestObject:
             logger.disabled = True
         self.timeout = self.kargs.get('timeout')
         self.out = self.kargs.get('out')
+        self.out_dir = None
         self.continue_out = self.kargs.get('continue_out')
         self.__init_extra__()
     
@@ -65,6 +66,7 @@ class RequestObject:
             if self.out == 'default' and path_name:
                 self.out = path_name
             elif os.path.isdir(self.out) and path_name:
+                self.out_dir = self.out
                 self.out = os.path.join(self.out, path_name)
             if os.path.isfile(self.out) and self.continue_out:
                 sz = os.stat(self.out).st_size
@@ -103,7 +105,8 @@ class Response:
     def __init__(self, url, method=None, error=None,
                  session_cookies=None, charset=None,
                  info=None, status=None, content_type=None,
-                 content_encoding=None, html=None):
+                 content_encoding=None, html=None,
+                 out_file=None, out_dir=None, binary=None):
         self.method = method
         self.error = error
         self.session_cookies = session_cookies
@@ -114,4 +117,6 @@ class Response:
         self.url = url
         self.content_type = content_type
         self.content_encoding = content_encoding
-    
+        self.out_file = out_file
+        self.out_dir = out_dir
+        self.binary = binary
